@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: metrics_postgres
+    environment:
+      POSTGRES_DB: metrics_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - metrics_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: metrics_prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - metrics_network
+    depends_on:
+      - pushgateway
+
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: metrics_pushgateway
+    ports:
+      - "9091:9091"
+    volumes:
+      - pushgateway_data:/pushgateway
+    networks:
+      - metrics_network
+    command:
+      - '--persistence.file=/pushgateway/data'
+      - '--persistence.interval=5m'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: metrics_grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - metrics_network
+    depends_on:
+      - prometheus
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: metrics_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=metrics_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
+      - PUSHGATEWAY_URL=http://pushgateway:9091
+      - GRAFANA_URL=http://localhost:3001
+      - FRONTEND_URL=http://localhost:5173
+      - API_BASE_URL=http://localhost:3000
+    volumes:
+      - ../backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - metrics_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  pushgateway_data:
+  grafana_data:
+
+networks:
+  metrics_network:
+    driver: bridge
+

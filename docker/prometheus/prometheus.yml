@@ -2,35 +2,16 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'unified-visibility-platform'
-    environment: 'development'
+    monitor: 'metrics-monitor'
 
-# Alertmanager configuration (to be added)
-# alerting:
-#   alertmanagers:
-#     - static_configs:
-#         - targets: []
-
-# Load rules once and periodically evaluate them
-rule_files:
-  # - "rules/*.yml"
-
-# Scrape configurations
+# Scrape Pushgateway
 scrape_configs:
-  # Prometheus self-monitoring
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
-
-  # Prometheus Pushgateway - collects metrics pushed by clients
   - job_name: 'pushgateway'
     honor_labels: true
     static_configs:
-      - targets: ['prometheus-pushgateway:9091']
+      - targets: ['pushgateway:9091']
 
-  # Backend API metrics (optional - if backend exposes /metrics endpoint)
-  # - job_name: 'backend-api'
-  #   static_configs:
-  #     - targets: ['backend:8000']
-  #   metrics_path: '/metrics'
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
 

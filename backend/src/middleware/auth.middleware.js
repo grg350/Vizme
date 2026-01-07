@@ -1,163 +1,57 @@
-/**
- * Authentication Middleware
- * Validates JWT tokens and API keys
- */
+import jwt from 'jsonwebtoken';
+import { query } from '../database/connection.js';
+import { UnauthorizedError } from './errorHandler.js';
 
-const jwt = require('jsonwebtoken');
-const { User, ApiKey } = require('../models');
-const config = require('../config');
-const logger = require('../utils/logger');
-
-/**
- * Middleware to authenticate JWT tokens
- */
-async function authenticateToken(req, res, next) {
+export const authenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-    if (!token) {
-      return res.status(401).json({
-        error: true,
-        message: 'Authentication token required'
-      });
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedError('No token provided');
     }
 
-    // Verify token
-    const decoded = jwt.verify(token, config.auth.jwtSecret);
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
 
-    // Find user
-    const user = await User.findByPk(decoded.id);
-    if (!user || !user.isActive) {
-      return res.status(401).json({
-        error: true,
-        message: 'Invalid or inactive user'
-      });
+    // Verify user still exists
+    const result = await query('SELECT id, email, name FROM users WHERE id = $1', [decoded.userId]);
+    
+    if (result.rows.length === 0) {
+      throw new UnauthorizedError('User not found');
     }
 
-    // Attach user to request
-    req.user = user;
+    req.user = result.rows[0];
     next();
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        error: true,
-        message: 'Invalid authentication token'
-      });
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return next(new UnauthorizedError('Invalid or expired token'));
     }
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        error: true,
-        message: 'Authentication token expired'
-      });
-    }
-
-    logger.error('Authentication error', {
-      error: error.message,
-      stack: error.stack
-    });
-
-    res.status(500).json({
-      error: true,
-      message: 'Authentication failed'
-    });
+    next(error);
   }
-}
+};
 
-/**
- * Middleware to authenticate API keys (optional)
- */
-async function authenticateApiKey(req, res, next) {
+export const authenticateApiKey = async (req, res, next) => {
   try {
-    const apiKey = req.headers['x-api-key'];
-    const apiSecret = req.headers['x-api-secret'];
-
-    // If no API key provided, continue without authentication
+    const apiKey = req.headers['x-api-key'] || req.query.api_key;
+    
     if (!apiKey) {
-      return next();
+      throw new UnauthorizedError('API key required');
     }
 
-    // Find API key
-    const keyRecord = await ApiKey.findOne({
-      where: { apiKey, isActive: true },
-      include: [{
-        model: User,
-        as: 'user',
-        where: { isActive: true },
-        required: true
-      }]
-    });
+    const result = await query(
+      'SELECT ak.*, u.id as user_id, u.email FROM api_keys ak JOIN users u ON ak.user_id = u.id WHERE ak.api_key = $1 AND ak.is_active = true',
+      [apiKey]
+    );
 
-    if (!keyRecord) {
-      return res.status(401).json({
-        error: true,
-        message: 'Invalid API key'
-      });
+    if (result.rows.length === 0) {
+      throw new UnauthorizedError('Invalid or inactive API key');
     }
 
-    // Verify API secret if provided
-    if (apiSecret && !keyRecord.verifySecret(apiSecret)) {
-      return res.status(401).json({
-        error: true,
-        message: 'Invalid API secret'
-      });
-    }
-
-    // Check expiration
-    if (keyRecord.expiresAt && new Date() > keyRecord.expiresAt) {
-      return res.status(401).json({
-        error: true,
-        message: 'API key has expired'
-      });
-    }
-
-    // Update last used
-    await keyRecord.update({ lastUsedAt: new Date() });
-
-    // Attach user and API key to request
-    req.user = keyRecord.user;
-    req.apiKey = keyRecord;
-
+    req.apiKey = result.rows[0];
+    req.user = { id: result.rows[0].user_id, email: result.rows[0].email };
     next();
   } catch (error) {
-    logger.error('API key authentication error', {
-      error: error.message,
-      stack: error.stack
-    });
-
-    res.status(500).json({
-      error: true,
-      message: 'API key authentication failed'
-    });
+    next(error);
   }
-}
-
-/**
- * Optional authentication - doesn't fail if no token provided
- */
-async function optionalAuth(req, res, next) {
-  try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (token) {
-      const decoded = jwt.verify(token, config.auth.jwtSecret);
-      const user = await User.findByPk(decoded.id);
-      if (user && user.isActive) {
-        req.user = user;
-      }
-    }
-
-    next();
-  } catch (error) {
-    // Ignore errors for optional auth
-    next();
-  }
-}
-
-module.exports = {
-  authenticateToken,
-  authenticateApiKey,
-  optionalAuth
 };
 

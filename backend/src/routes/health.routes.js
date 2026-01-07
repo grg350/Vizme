@@ -1,21 +1,28 @@
-/**
- * Health Check Routes
- * Provides health and status endpoints
- */
-
-const express = require('express');
-const healthController = require('../api/controllers/health.controller');
+import express from 'express';
+import { query } from '../database/connection.js';
 
 const router = express.Router();
 
-// GET /api/v1/health - Health check endpoint
-router.get('/', healthController.healthCheck);
+router.get('/', async (req, res) => {
+  try {
+    // Check database connection
+    await query('SELECT NOW()');
+    
+    res.json({
+      success: true,
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      status: 'unhealthy',
+      error: 'Database connection failed',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
 
-// GET /api/v1/health/ready - Readiness probe
-router.get('/ready', healthController.readinessCheck);
-
-// GET /api/v1/health/live - Liveness probe
-router.get('/live', healthController.livenessCheck);
-
-module.exports = router;
+export { router as healthRoutes };
 

@@ -1,276 +1,196 @@
-/**
- * Code Generator Service
- * Generates custom client library code based on metric configurations
- */
+export const generateTrackingCode = ({ apiKey, metricConfigs, autoTrack, customEvents, baseUrl }) => {
+  const metricsEndpoint = `${baseUrl}/api/v1/metrics`;
+  
+  // Build metric configs object
+  const configsObject = metricConfigs.reduce((acc, config) => {
+    acc[config.metric_name] = {
+      type: config.metric_type,
+      labels: config.labels || [],
+      help: config.help_text || ''
+    };
+    return acc;
+  }, {});
 
-const logger = require('../utils/logger');
-
-class CodeGeneratorService {
-  /**
-   * Generate client library code
-   * @param {Object} options - Generation options
-   * @param {Object} options.metricConfig - Metric configuration
-   * @param {string} options.apiKey - API key
-   * @param {string} options.apiSecret - API secret
-   * @param {string} options.apiUrl - API base URL
-   * @returns {string} Generated JavaScript code
-   */
-  generateClientCode({ metricConfig, apiKey, apiSecret, apiUrl }) {
-    const metricName = metricConfig.metricName;
-    const metricType = metricConfig.metricType || 'gauge';
-    const labels = metricConfig.labels || {};
-    const autoTrack = metricConfig.autoTrack !== false;
-    const trackingEvents = metricConfig.trackingEvents || [];
-
-    // Build labels string
-    const labelsString = this.buildLabelsString(labels);
-
-    // Build tracking code
-    const trackingCode = this.buildTrackingCode(metricConfig, trackingEvents);
-
-    // Generate the code
-    const code = `/**
- * Auto-generated Visibility Tracker Code
- * Metric: ${metricConfig.name} (${metricName})
- * Generated: ${new Date().toISOString()}
- * 
- * Instructions:
- * 1. Copy this entire code block
- * 2. Paste it before the closing </body> tag of your HTML
- * 3. The metrics will automatically start tracking
- */
-
+  const code = `
 (function() {
   'use strict';
-
+  
   // Configuration
   const CONFIG = {
-    apiUrl: '${apiUrl}',
     apiKey: '${apiKey}',
-    apiSecret: '${apiSecret}',
-    metricName: '${metricName}',
-    metricType: '${metricType}',
-    labels: ${JSON.stringify(labels, null, 2)},
-    batchSize: 10,
-    flushInterval: 5000
+    endpoint: '${metricsEndpoint}',
+    metrics: ${JSON.stringify(configsObject, null, 2)},
+    autoTrack: ${autoTrack},
+    customEvents: ${customEvents}
   };
 
-  // Internal state
-  let metricsQueue = [];
-  let flushTimer = null;
+  // Queue for offline support
+  const queue = [];
+  const MAX_QUEUE_SIZE = 100;
 
-  /**
-   * Get browser information
-   */
-  function getBrowserInfo() {
-    return {
-      userAgent: navigator.userAgent,
-      language: navigator.language,
-      platform: navigator.platform,
-      screenWidth: window.screen ? window.screen.width : null,
-      screenHeight: window.screen ? window.screen.height : null,
-      viewportWidth: window.innerWidth,
-      viewportHeight: window.innerHeight
-    };
-  }
+  // Batch metrics for sending
+  let batch = [];
+  const BATCH_SIZE = 10;
+  const BATCH_TIMEOUT = 5000; // 5 seconds
 
-  /**
-   * Get page information
-   */
-  function getPageInfo() {
-    return {
-      url: window.location.href,
-      path: window.location.pathname,
-      host: window.location.host,
-      referrer: document.referrer || '',
-      title: document.title || ''
-    };
-  }
+  let batchTimer = null;
 
-  /**
-   * Flush metrics to API
-   */
-  function flushMetrics() {
-    if (metricsQueue.length === 0) return;
+  // Send metrics to server
+  function sendMetrics(metrics) {
+    if (!metrics || metrics.length === 0) return;
 
-    const metricsToSend = [...metricsQueue];
-    metricsQueue = [];
-
-    const url = CONFIG.apiUrl.replace(/\\/$/, '') + '/api/v1/metrics';
     const payload = {
-      metrics: metricsToSend,
-      job: 'web_client',
-      instance: CONFIG.apiKey
+      metrics: metrics.map(m => ({
+        name: m.name,
+        type: m.type,
+        value: m.value,
+        labels: m.labels || {}
+      }))
     };
 
-    fetch(url, {
+    // Try to send immediately
+    fetch(CONFIG.endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': CONFIG.apiKey,
-        'X-API-Secret': CONFIG.apiSecret
+        'X-API-Key': CONFIG.apiKey
       },
-      body: JSON.stringify(payload),
-      keepalive: true
-    }).catch(function(error) {
-      console.error('[VisibilityTracker] Failed to send metrics:', error);
-      // Re-queue on failure (up to limit)
-      if (metricsToSend.length < 100) {
-        metricsQueue.unshift(...metricsToSend);
+      body: JSON.stringify(payload)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to send metrics');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.warn('Metrics tracking error:', error);
+      // Add to queue for retry
+      if (queue.length < MAX_QUEUE_SIZE) {
+        queue.push(...metrics);
       }
     });
   }
 
-  /**
-   * Schedule metrics flush
-   */
-  function scheduleFlush() {
-    if (flushTimer) clearTimeout(flushTimer);
-    flushTimer = setTimeout(flushMetrics, CONFIG.flushInterval);
+  // Process batch
+  function processBatch() {
+    if (batch.length === 0) return;
+    
+    const metricsToSend = [...batch];
+    batch = [];
+    
+    sendMetrics(metricsToSend);
   }
 
-  /**
-   * Track metric
-   */
-  function trackMetric(value, additionalLabels = {}) {
-    const browserInfo = getBrowserInfo();
-    const pageInfo = getPageInfo();
+  // Add metric to batch
+  function addMetric(metric) {
+    batch.push(metric);
+    
+    if (batch.length >= BATCH_SIZE) {
+      processBatch();
+    } else {
+      // Reset timer
+      if (batchTimer) {
+        clearTimeout(batchTimer);
+      }
+      batchTimer = setTimeout(processBatch, BATCH_TIMEOUT);
+    }
+  }
+
+  // Track metric
+  function trackMetric(name, value, labels = {}) {
+    const config = CONFIG.metrics[name];
+    if (!config) {
+      console.warn('Unknown metric:', name);
+      return;
+    }
 
     const metric = {
-      name: CONFIG.metricName,
+      name: name,
+      type: config.type,
       value: typeof value === 'number' ? value : parseFloat(value) || 0,
-      type: CONFIG.metricType,
-      labels: {
-        ...CONFIG.labels,
-        ...additionalLabels,
-        ...browserInfo,
-        ...pageInfo,
-        timestamp: new Date().toISOString()
-      }
+      labels: { ...config.labels, ...labels }
     };
 
-    metricsQueue.push(metric);
+    addMetric(metric);
+  }
 
-    // Flush if batch size reached
-    if (metricsQueue.length >= CONFIG.batchSize) {
-      flushMetrics();
-    } else {
-      scheduleFlush();
+  // Auto-tracking
+  if (CONFIG.autoTrack) {
+    // Page view
+    if (typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('load', function() {
+        trackMetric('page_views', 1, {
+          page: window.location.pathname,
+          referrer: document.referrer || ''
+        });
+      });
+
+      // Time on page
+      let startTime = Date.now();
+      window.addEventListener('beforeunload', function() {
+        const timeOnPage = Math.round((Date.now() - startTime) / 1000);
+        trackMetric('time_on_page', timeOnPage, {
+          page: window.location.pathname
+        });
+        // Send remaining batch
+        processBatch();
+      });
     }
   }
 
-  ${trackingCode}
-
-  // Auto-track on page load if enabled
-  if (${autoTrack}) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        trackMetric(1, { event: 'page_load' });
-      });
-    } else {
-      trackMetric(1, { event: 'page_load' });
-    }
-
-    // Track page views on navigation (for SPAs)
-    if (window.history && window.history.pushState) {
-      const originalPushState = window.history.pushState;
-      window.history.pushState = function() {
-        originalPushState.apply(window.history, arguments);
-        setTimeout(function() {
-          trackMetric(1, { event: 'page_view' });
-        }, 100);
+  // Custom events tracking
+  if (CONFIG.customEvents) {
+    // Expose global tracking function
+    if (typeof window !== 'undefined') {
+      window.trackMetric = function(name, value, labels) {
+        trackMetric(name, value, labels);
       };
 
-      window.addEventListener('popstate', function() {
-        setTimeout(function() {
-          trackMetric(1, { event: 'page_view' });
-        }, 100);
-      });
-    }
+      // Track clicks on elements with data-track attribute
+      if (document.addEventListener) {
+        document.addEventListener('click', function(e) {
+          const element = e.target.closest('[data-track]');
+          if (element) {
+            const metricName = element.getAttribute('data-track');
+            const metricValue = parseFloat(element.getAttribute('data-value')) || 1;
+            const metricLabels = {};
+            
+            // Extract label attributes
+            Array.from(element.attributes).forEach(attr => {
+              if (attr.name.startsWith('data-label-')) {
+                const labelName = attr.name.replace('data-label-', '');
+                metricLabels[labelName] = attr.value;
+              }
+            });
 
-    // Flush on page unload
-    window.addEventListener('beforeunload', function() {
-      if (navigator.sendBeacon && metricsQueue.length > 0) {
-        const url = CONFIG.apiUrl.replace(/\\/$/, '') + '/api/v1/metrics';
-        const data = JSON.stringify({
-          metrics: metricsQueue,
-          job: 'web_client',
-          instance: CONFIG.apiKey
+            trackMetric(metricName, metricValue, metricLabels);
+          }
         });
-        navigator.sendBeacon(url, data);
-      } else {
-        flushMetrics();
+      }
+    }
+  }
+
+  // Retry queue on online
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('online', function() {
+      if (queue.length > 0) {
+        const metricsToRetry = queue.splice(0, BATCH_SIZE);
+        sendMetrics(metricsToRetry);
       }
     });
   }
 
-  // Expose public API
-  window.VisibilityTracker = {
-    track: trackMetric,
-    flush: flushMetrics
-  };
+  // Expose API
+  if (typeof window !== 'undefined') {
+    window.MetricsTracker = {
+      track: trackMetric,
+      flush: processBatch
+    };
+  }
 })();
-`;
+`.trim();
 
-    return code;
-  }
-
-  /**
-   * Build labels string for code
-   */
-  buildLabelsString(labels) {
-    if (!labels || Object.keys(labels).length === 0) {
-      return '{}';
-    }
-    return JSON.stringify(labels);
-  }
-
-  /**
-   * Build tracking code based on events
-   */
-  buildTrackingCode(metricConfig, trackingEvents) {
-    if (!trackingEvents || trackingEvents.length === 0) {
-      return '';
-    }
-
-    let code = '\n  // Custom event tracking\n';
-    
-    trackingEvents.forEach(event => {
-      switch (event) {
-        case 'click':
-          code += `  document.addEventListener('click', function(e) {
-    trackMetric(1, { event: 'click', element: e.target.tagName });
-  });\n`;
-          break;
-        case 'scroll':
-          code += `  let scrollTracked = false;
-  window.addEventListener('scroll', function() {
-    if (!scrollTracked) {
-      scrollTracked = true;
-      trackMetric(1, { event: 'scroll' });
-    }
-  });\n`;
-          break;
-        case 'form_submit':
-          code += `  document.addEventListener('submit', function(e) {
-    trackMetric(1, { event: 'form_submit', formId: e.target.id || 'unknown' });
-  });\n`;
-          break;
-        case 'button_click':
-          code += `  document.addEventListener('click', function(e) {
-    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-      trackMetric(1, { event: 'button_click', buttonText: e.target.textContent.substring(0, 50) });
-    }
-  });\n`;
-          break;
-        default:
-          code += `  // Custom event: ${event}\n`;
-      }
-    });
-
-    return code;
-  }
-}
-
-module.exports = new CodeGeneratorService();
+  return code;
+};
 
