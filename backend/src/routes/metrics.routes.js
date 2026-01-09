@@ -5,6 +5,7 @@ import { authenticateApiKey, authenticate } from '../middleware/auth.middleware.
 import { metricsLimiter } from '../middleware/rateLimiter.js';
 import { BadRequestError } from '../middleware/errorHandler.js';
 import { query } from '../database/connection.js';
+import { getMetrics } from '../services/dbMonitoring.service.js';
 
 const router = express.Router();
 
@@ -29,34 +30,48 @@ const validateMetricValue = (value, type) => {
 
 // Push metric to Prometheus Pushgateway
 const pushToPrometheus = async (metric, userId) => {
-  const { name, type, value, labels } = metric;
-
+  const metricName = metric.name.replace(/[^a-zA-Z0-9_]/g, '_');
+  const metricType = metric.type || 'gauge';
+  
   // Build Prometheus metric format
-  const labelString = Object.entries(labels || {})
-    .map(([k, v]) => `${k}="${String(v).replace(/"/g, '\\"')}"`)
+  let prometheusMetric = `# TYPE ${metricName} ${metricType}\n`;
+  
+  // Build labels string
+  const labels = Object.entries(metric.labels || {})
+    .map(([key, value]) => `${key}="${String(value).replace(/"/g, '\\"')}"`)
     .join(',');
   
-  const metricString = labelString 
-    ? `${name}{${labelString}} ${value}`
-    : `${name} ${value}`;
-
-  // Push to Pushgateway
-  // Format: /metrics/job/<job_name>/<label>/<label_value>
-  const jobName = `user_${userId}`;
-  const pushUrl = `${PUSHGATEWAY_URL}/metrics/job/${jobName}`;
+  const labelsStr = labels ? `{${labels}}` : '';
+  prometheusMetric += `${metricName}${labelsStr} ${metric.value}\n`;
 
   try {
-    await axios.post(pushUrl, metricString, {
-      headers: {
-        'Content-Type': 'text/plain'
-      },
-      timeout: 5000
-    });
+    const response = await axios.post(
+      `${PUSHGATEWAY_URL}/metrics/job/metrics_platform/instance/${userId}`,
+      prometheusMetric,
+      {
+        headers: { 'Content-Type': 'text/plain' },
+        timeout: 5000,
+      }
+    );
+
+    return response.status === 200;
   } catch (error) {
-    console.error('Failed to push to Pushgateway:', error.message);
+    console.error('Failed to push metric to Prometheus:', error.message);
     throw new Error('Failed to push metric to Prometheus');
   }
 };
+
+// Prometheus metrics endpoint (exposes database metrics)
+router.get('/prometheus', async (req, res) => {
+  try {
+    const metrics = await getMetrics();
+    res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+    res.send(metrics);
+  } catch (error) {
+    console.error('Error getting metrics:', error);
+    res.status(500).json({ error: 'Failed to retrieve metrics' });
+  }
+});
 
 // Metrics ingestion endpoint (requires API key)
 router.post('/',
@@ -124,11 +139,8 @@ router.post('/',
 
       res.json({
         success: true,
-        data: {
-          processed: validMetrics.length,
-          total: metrics.length,
-          errors: errors_list.length > 0 ? errors_list : undefined
-        }
+        processed: validMetrics.length,
+        errors: errors_list.length > 0 ? errors_list : undefined
       });
     } catch (error) {
       next(error);
@@ -136,17 +148,16 @@ router.post('/',
   }
 );
 
-// Get metrics (for authenticated users to view their metrics)
-router.get('/',
+// Get metrics summary (requires authentication)
+router.get('/summary',
   authenticate,
   async (req, res, next) => {
     try {
       // This would typically query Prometheus API or a metrics database
-      // For MVP, we'll return a message directing to Grafana
+      // For now, return a placeholder
       res.json({
         success: true,
-        message: 'View your metrics in Grafana',
-        grafanaUrl: process.env.GRAFANA_URL || 'http://localhost:3001'
+        message: 'Metrics summary endpoint - to be implemented with Prometheus query API'
       });
     } catch (error) {
       next(error);
@@ -155,4 +166,3 @@ router.get('/',
 );
 
 export { router as metricsRoutes };
-
