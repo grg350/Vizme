@@ -1,0 +1,161 @@
+groups:
+  - name: application_alerts
+    rules:
+      # High Error Rate - HTTP 5xx rate > 5% for 5 minutes
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(uvp_http_requests_total{status_code=~"5.."}[5m])) 
+            / 
+            sum(rate(uvp_http_requests_total[5m]))
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "High HTTP error rate detected"
+          description: "Error rate is {{ $value | printf \"%.2f\" }}% (threshold: 5%)"
+          runbook_url: "https://wiki.example.com/runbooks/high-error-rate"
+
+      # High Latency - P95 latency > 1 second for 5 minutes
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(uvp_http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "High request latency detected"
+          description: "P95 latency is {{ $value | printf \"%.2f\" }}s (threshold: 1s)"
+          runbook_url: "https://wiki.example.com/runbooks/high-latency"
+
+      # Service Down - Target down for 1 minute
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute"
+          runbook_url: "https://wiki.example.com/runbooks/service-down"
+
+      # High Request Rate (potential DDoS or traffic spike)
+      - alert: HighRequestRate
+        expr: sum(rate(uvp_http_requests_total[1m])) > 1000
+        for: 2m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Unusually high request rate"
+          description: "Request rate is {{ $value | printf \"%.0f\" }} req/s"
+
+  - name: infrastructure_alerts
+    rules:
+      # High CPU Usage - CPU > 80% for 5 minutes
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 80%)"
+          runbook_url: "https://wiki.example.com/runbooks/high-cpu"
+
+      # High Memory Usage - Memory > 85% for 5 minutes
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}% (threshold: 85%)"
+          runbook_url: "https://wiki.example.com/runbooks/high-memory"
+
+      # High Disk Usage - Disk > 90% for 5 minutes
+      - alert: HighDiskUsage
+        expr: |
+          (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "High disk usage on {{ $labels.instance }}"
+          description: "Disk usage on {{ $labels.mountpoint }} is {{ $value | printf \"%.1f\" }}% (threshold: 90%)"
+          runbook_url: "https://wiki.example.com/runbooks/high-disk"
+
+      # High Load Average
+      - alert: HighLoadAverage
+        expr: node_load1 > 0.8 * count by(instance) (node_cpu_seconds_total{mode="idle"})
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High load average on {{ $labels.instance }}"
+          description: "1-minute load average is {{ $value | printf \"%.2f\" }}"
+
+  - name: database_alerts
+    rules:
+      # Database Connection Pool Exhaustion
+      - alert: DatabaseConnectionPoolExhausted
+        expr: uvp_active_db_connections > 18
+        for: 2m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: "Active connections: {{ $value }} (max: 20)"
+
+      # Slow Database Queries
+      - alert: SlowDatabaseQueries
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(uvp_db_query_duration_seconds_bucket[5m])) by (le)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Slow database queries detected"
+          description: "P95 query latency is {{ $value | printf \"%.3f\" }}s (threshold: 0.5s)"
+
+  - name: sli_alerts
+    rules:
+      # Availability SLO Breach
+      - alert: AvailabilitySLOBreach
+        expr: sli:availability:ratio < 0.999
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Availability SLO breach"
+          description: "Current availability is {{ $value | printf \"%.4f\" }} (target: 0.999)"
+
+      # Error Budget Exhausted
+      - alert: ErrorBudgetExhausted
+        expr: sli:error_budget:remaining < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Error budget nearly exhausted"
+          description: "Only {{ $value | printf \"%.1f\" }}% of error budget remaining"
+

@@ -2,16 +2,48 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    monitor: 'metrics-monitor'
+    monitor: 'uvp-monitor'
 
-# Scrape Pushgateway
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Rule files
+rule_files:
+  - /etc/prometheus/alert_rules.yml
+  - /etc/prometheus/recording_rules.yml
+
+# Scrape configurations
 scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Pushgateway for user metrics
   - job_name: 'pushgateway'
     honor_labels: true
     static_configs:
       - targets: ['pushgateway:9091']
 
-  - job_name: 'prometheus'
+  # Backend application metrics
+  - job_name: 'backend'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['backend:3000']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # Node exporter for infrastructure metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Alertmanager metrics
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
 

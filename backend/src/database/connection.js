@@ -16,9 +16,25 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
+// Metrics tracking - will be set after import to avoid circular dependency
+let dbMetrics = null;
+
+export const setDbMetrics = (metrics) => {
+  dbMetrics = metrics;
+};
+
 // Test connection
 pool.on("connect", () => {
   console.log("✅ Connected to PostgreSQL database");
+  if (dbMetrics?.activeDbConnections) {
+    dbMetrics.activeDbConnections.inc();
+  }
+});
+
+pool.on("remove", () => {
+  if (dbMetrics?.activeDbConnections) {
+    dbMetrics.activeDbConnections.dec();
+  }
 });
 
 pool.on("error", (err) => {
@@ -26,15 +42,49 @@ pool.on("error", (err) => {
   process.exit(-1);
 });
 
+// Extract query type from SQL text
+const getQueryType = (text) => {
+  const trimmed = text.trim().toUpperCase();
+  if (trimmed.startsWith('SELECT')) return 'select';
+  if (trimmed.startsWith('INSERT')) return 'insert';
+  if (trimmed.startsWith('UPDATE')) return 'update';
+  if (trimmed.startsWith('DELETE')) return 'delete';
+  if (trimmed.startsWith('CREATE')) return 'create';
+  if (trimmed.startsWith('DROP')) return 'drop';
+  if (trimmed.startsWith('ALTER')) return 'alter';
+  return 'other';
+};
+
 export const query = async (text, params) => {
   const start = Date.now();
+  const queryType = getQueryType(text);
+  let success = 'true';
+  
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log("Executed query", { text, duration, rows: res.rowCount });
+    
+    // Record metrics if available
+    if (dbMetrics) {
+      const durationSeconds = duration / 1000;
+      dbMetrics.dbQueryDuration.labels(queryType, success).observe(durationSeconds);
+      dbMetrics.dbQueriesTotal.labels(queryType, success).inc();
+    }
+    
+    console.log("Executed query", { text: text.substring(0, 50), duration, rows: res.rowCount });
     return res;
   } catch (error) {
-    console.error("Query error", { text, error: error.message });
+    success = 'false';
+    const duration = Date.now() - start;
+    
+    // Record error metrics
+    if (dbMetrics) {
+      const durationSeconds = duration / 1000;
+      dbMetrics.dbQueryDuration.labels(queryType, success).observe(durationSeconds);
+      dbMetrics.dbQueriesTotal.labels(queryType, success).inc();
+    }
+    
+    console.error("Query error", { text: text.substring(0, 50), error: error.message });
     throw error;
   }
 };

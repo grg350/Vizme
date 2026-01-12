@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: metrics_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
@@ -19,6 +19,24 @@ services:
       retries: 5
     networks:
       - metrics_network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: metrics_node_exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - metrics_network
+    restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
@@ -34,11 +52,30 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - ./prometheus/recording_rules.yml:/etc/prometheus/recording_rules.yml
       - prometheus_data:/prometheus
     networks:
       - metrics_network
     depends_on:
       - pushgateway
+      - node-exporter
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: metrics_alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    networks:
+      - metrics_network
+    restart: unless-stopped
 
   pushgateway:
     image: prom/pushgateway:latest
@@ -52,6 +89,7 @@ services:
     command:
       - '--persistence.file=/pushgateway/data'
       - '--persistence.interval=5m'
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
@@ -60,8 +98,9 @@ services:
       - "3001:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
@@ -70,6 +109,7 @@ services:
       - metrics_network
     depends_on:
       - prometheus
+    restart: unless-stopped
 
   backend:
     build:
@@ -85,18 +125,33 @@ services:
       - DB_PORT=5432
       - DB_NAME=metrics_db
       - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
       - PUSHGATEWAY_URL=http://pushgateway:9091
+      - PROMETHEUS_URL=http://prometheus:9090
+      - ALERTMANAGER_URL=http://alertmanager:9093
       - GRAFANA_URL=http://localhost:3001
-      - FRONTEND_URL=http://localhost:5173
+      - FRONTEND_URL=http://localhost
       - API_BASE_URL=http://localhost:3000
-    volumes:
-      - ../backend:/app
-      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - metrics_network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: metrics_frontend
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+      - VITE_GRAFANA_URL=http://localhost:3001
+    depends_on:
+      - backend
     networks:
       - metrics_network
     restart: unless-stopped
@@ -106,6 +161,7 @@ volumes:
   prometheus_data:
   pushgateway_data:
   grafana_data:
+  alertmanager_data:
 
 networks:
   metrics_network:

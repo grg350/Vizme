@@ -1,121 +1,178 @@
-# Metrics Tracker - MVP
+# Unified Visibility Platform (UVP)
 
-A comprehensive metrics collection and visualization platform that allows users to configure custom metrics, generate tracking code, and visualize data in Grafana.
+A comprehensive observability platform providing a "Single Pane of Glass" for monitoring applications and infrastructure. Features real-time metrics, custom dashboards, alerting, and SLI/SLO tracking.
 
-## Features
+## ✨ Features
 
-✅ **User Authentication** - Secure signup/login with JWT tokens  
-✅ **Metric Configuration** - Define custom metrics (counter, gauge, histogram, summary)  
-✅ **API Key Management** - Generate and manage API keys for authentication  
-✅ **Code Generation** - Generate JavaScript tracking code for client websites  
-✅ **Metrics Ingestion** - REST API endpoint for collecting metrics  
-✅ **Prometheus Integration** - Store metrics in Prometheus time-series database  
-✅ **Grafana Visualization** - Pre-configured dashboards for metric visualization
+- **📊 Unified Dashboard** - Real-time metrics visualization in React with auto-refresh
+- **🔍 Application Metrics** - HTTP request rates, latency percentiles, error rates
+- **💻 Infrastructure Metrics** - CPU, memory, disk, and network monitoring
+- **🚨 Alerting** - Threshold-based alerts with Alertmanager integration
+- **📈 SLI/SLO Tracking** - Availability and latency SLIs with error budget tracking
+- **🎨 Custom Metrics** - Define and collect custom business metrics
+- **📉 Grafana Dashboards** - Pre-configured production-quality dashboards
+- **🔐 Secure** - JWT authentication, API key management, no hardcoded secrets
 
-## Quick Start
+## 🚀 Quick Start
 
-### Using Docker (Recommended)
+### One-Command Startup
 
 ```bash
-# Start all services
-cd docker
-docker-compose up -d
+# Start the entire platform
+./start.sh
 
-# Setup backend
-cd ../backend
-npm install
-cp .env.example .env
-npm start
-
-# Setup frontend
-cd ../frontend
-npm install
-npm run dev
+# Or with rebuild
+./start.sh --build
 ```
 
-Access:
+That's it! The platform will be available at:
 
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3000
-- Grafana: http://localhost:3001 (admin/admin)
-- Prometheus: http://localhost:9090
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| **Frontend** | http://localhost | Create account |
+| **Backend API** | http://localhost:3000 | - |
+| **Grafana** | http://localhost:3001 | admin / admin |
+| **Prometheus** | http://localhost:9090 | - |
+| **Alertmanager** | http://localhost:9093 | - |
 
-### Manual Setup
+### Stop the Platform
 
-See [docs/SETUP.md](./docs/SETUP.md) for detailed instructions.
-
-## Project Structure
-
-```
-unified-project/
-├── backend/          # Node.js + Express API
-├── frontend/         # React + Vite application
-├── docker/           # Docker Compose configuration
-└── docs/             # Documentation
+```bash
+./stop.sh
 ```
 
-## Documentation
+## 📁 Project Structure
 
-- [Setup Guide](./docs/SETUP.md) - Detailed setup instructions
-- [API Documentation](./docs/README.md#api-documentation) - Complete API reference
-- [Architecture](./docs/ARCHITECTURE.md) - System architecture and design
+```
+unified_visibility_platform/
+├── backend/                 # Node.js + Express API
+│   ├── src/
+│   │   ├── database/        # PostgreSQL connection
+│   │   ├── middleware/      # Auth, metrics, error handling
+│   │   ├── routes/          # API endpoints
+│   │   └── services/        # Business logic
+│   └── Dockerfile
+├── frontend/                # React + Vite application
+│   ├── src/
+│   │   ├── api/             # API clients
+│   │   ├── components/      # Reusable components
+│   │   │   └── charts/      # Chart components
+│   │   ├── pages/           # Page components
+│   │   └── store/           # Zustand state
+│   ├── Dockerfile
+│   └── nginx.conf
+├── docker/                  # Docker Compose setup
+│   ├── alertmanager/        # Alertmanager config
+│   ├── grafana/             # Grafana dashboards & provisioning
+│   └── prometheus/          # Prometheus config & rules
+├── start.sh                 # One-command startup
+└── stop.sh                  # Stop all services
+```
 
-## Technology Stack
+## 📊 Metrics & Monitoring
 
-**Backend:**
+### Application Metrics (Backend)
 
-- Node.js 20 + Express 5
-- PostgreSQL 15
-- JWT Authentication
-- Prometheus Pushgateway
+The backend exposes Prometheus metrics at `/metrics`:
 
-**Frontend:**
+- `uvp_http_requests_total` - Total HTTP requests by method, route, status
+- `uvp_http_request_duration_seconds` - Request latency histogram
+- `uvp_db_query_duration_seconds` - Database query latency
+- `uvp_active_connections` - Current active connections
 
-- React 18 + Vite
-- React Router
-- Zustand
+### Infrastructure Metrics (Node Exporter)
 
-**Infrastructure:**
+- CPU, memory, disk usage
+- Network I/O
+- System load average
 
-- Docker & Docker Compose
-- Prometheus
-- Grafana
+### SLI Metrics (Recording Rules)
 
-## User Flow
+- `sli:availability:ratio` - Successful request ratio
+- `sli:latency:ratio` - Requests under 500ms ratio
+- `sli:error_budget:remaining` - Remaining error budget
 
-1. **Sign Up/Login** - Create account and authenticate
-2. **Configure Metrics** - Define what metrics to collect
-3. **Generate API Key** - Create authentication key
-4. **Generate Code** - Get JavaScript tracking snippet
-5. **Integrate** - Paste code in your website
-6. **Visualize** - View metrics in Grafana
+## 🚨 Alert Rules
 
-## Development
+Pre-configured alerts include:
 
-### Backend
+| Alert | Condition | Severity |
+|-------|-----------|----------|
+| HighErrorRate | 5xx rate > 5% for 5m | Critical |
+| HighLatency | P95 > 1s for 5m | Warning |
+| ServiceDown | Target down for 1m | Critical |
+| HighCPUUsage | CPU > 80% for 5m | Warning |
+| HighMemoryUsage | Memory > 85% for 5m | Warning |
+| HighDiskUsage | Disk > 90% for 5m | Critical |
+
+## 🎨 Grafana Dashboards
+
+Three pre-configured dashboards:
+
+1. **Application Overview** - Request rates, latency, errors, SLIs
+2. **Infrastructure Overview** - CPU, memory, disk, network
+3. **User Metrics** - Custom metrics from Pushgateway
+
+## 🔧 Development
+
+### Backend Development
 
 ```bash
 cd backend
 npm install
-npm run dev  # Development with auto-reload
+npm run dev
 ```
 
-### Frontend
+### Frontend Development
 
 ```bash
 cd frontend
 npm install
-npm run dev  # Development server
+npm run dev
 ```
 
-## Production Deployment
+### Run Tests
 
-See [docs/README.md](./docs/README.md#deployment) for production deployment guidelines.
+```bash
+cd backend
+npm test
+```
 
-## License
+## 🔐 Environment Variables
+
+Required environment variables (set in docker-compose or shell):
+
+```bash
+JWT_SECRET=your-secure-jwt-secret-min-32-characters
+DB_PASSWORD=your-secure-database-password
+```
+
+See `backend/.env.example` for all options.
+
+## 📚 User Flow
+
+1. **Sign Up** - Create an account at http://localhost
+2. **Configure Metrics** - Define custom metrics to collect
+3. **Generate API Key** - Create authentication key for your app
+4. **Generate Code** - Copy JavaScript tracking snippet
+5. **Integrate** - Paste code in your website
+6. **Monitor** - View metrics in the unified dashboard or Grafana
+
+## 🛠 Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| Frontend | React 18, Vite, Recharts, Zustand |
+| Backend | Node.js 20, Express 5, PostgreSQL |
+| Metrics | Prometheus, Pushgateway, prom-client |
+| Visualization | Grafana, Recharts |
+| Alerting | Alertmanager |
+| Infrastructure | Docker, Nginx |
+
+## 📄 License
 
 ISC
 
-## Support
+## 🤝 Support
 
-For issues or questions, refer to the documentation in the `docs/` folder.
+For issues or questions, check the `docs/` folder or open an issue.

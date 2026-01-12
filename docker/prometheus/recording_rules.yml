@@ -1,0 +1,146 @@
+groups:
+  - name: sli_metrics
+    interval: 30s
+    rules:
+      # Availability SLI - ratio of successful requests
+      - record: sli:availability:ratio
+        expr: |
+          sum(rate(uvp_http_requests_total{status_code!~"5.."}[5m])) 
+          / 
+          sum(rate(uvp_http_requests_total[5m]))
+
+      # Latency SLI - percentage of requests under 500ms
+      - record: sli:latency:ratio
+        expr: |
+          sum(rate(uvp_http_request_duration_seconds_bucket{le="0.5"}[5m])) 
+          / 
+          sum(rate(uvp_http_request_duration_seconds_count[5m]))
+
+      # Error budget remaining (assuming 99.9% SLO)
+      - record: sli:error_budget:remaining
+        expr: |
+          1 - ((1 - sli:availability:ratio) / (1 - 0.999))
+
+      # Latency error budget (assuming 95% of requests under 500ms)
+      - record: sli:latency_error_budget:remaining
+        expr: |
+          1 - ((1 - sli:latency:ratio) / (1 - 0.95))
+
+  - name: request_aggregations
+    interval: 30s
+    rules:
+      # Total request rate
+      - record: http:request_rate:5m
+        expr: sum(rate(uvp_http_requests_total[5m]))
+
+      # Request rate by endpoint
+      - record: endpoint:request_rate:5m
+        expr: sum(rate(uvp_http_requests_total[5m])) by (route)
+
+      # Request rate by method
+      - record: method:request_rate:5m
+        expr: sum(rate(uvp_http_requests_total[5m])) by (method)
+
+      # Error rate
+      - record: http:error_rate:5m
+        expr: |
+          sum(rate(uvp_http_requests_total{status_code=~"5.."}[5m])) 
+          / 
+          sum(rate(uvp_http_requests_total[5m]))
+
+      # Error rate by endpoint
+      - record: endpoint:error_rate:5m
+        expr: |
+          sum(rate(uvp_http_requests_total{status_code=~"5.."}[5m])) by (route)
+          / 
+          sum(rate(uvp_http_requests_total[5m])) by (route)
+
+  - name: latency_aggregations
+    interval: 30s
+    rules:
+      # P50 latency (median)
+      - record: http:latency_p50:5m
+        expr: |
+          histogram_quantile(0.50, 
+            sum(rate(uvp_http_request_duration_seconds_bucket[5m])) by (le)
+          )
+
+      # P90 latency
+      - record: http:latency_p90:5m
+        expr: |
+          histogram_quantile(0.90, 
+            sum(rate(uvp_http_request_duration_seconds_bucket[5m])) by (le)
+          )
+
+      # P95 latency
+      - record: http:latency_p95:5m
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(uvp_http_request_duration_seconds_bucket[5m])) by (le)
+          )
+
+      # P99 latency
+      - record: http:latency_p99:5m
+        expr: |
+          histogram_quantile(0.99, 
+            sum(rate(uvp_http_request_duration_seconds_bucket[5m])) by (le)
+          )
+
+      # P95 latency by endpoint
+      - record: endpoint:latency_p95:5m
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(uvp_http_request_duration_seconds_bucket[5m])) by (route, le)
+          )
+
+  - name: database_aggregations
+    interval: 30s
+    rules:
+      # Database query rate
+      - record: db:query_rate:5m
+        expr: sum(rate(uvp_db_queries_total[5m]))
+
+      # Database query rate by type
+      - record: db:query_rate_by_type:5m
+        expr: sum(rate(uvp_db_queries_total[5m])) by (query_type)
+
+      # Database error rate
+      - record: db:error_rate:5m
+        expr: |
+          sum(rate(uvp_db_queries_total{success="false"}[5m])) 
+          / 
+          sum(rate(uvp_db_queries_total[5m]))
+
+      # Database P95 latency
+      - record: db:latency_p95:5m
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(uvp_db_query_duration_seconds_bucket[5m])) by (le)
+          )
+
+  - name: infrastructure_aggregations
+    interval: 30s
+    rules:
+      # CPU usage percentage
+      - record: instance:cpu_usage:percent
+        expr: |
+          100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+      # Memory usage percentage
+      - record: instance:memory_usage:percent
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+
+      # Disk usage percentage by mount
+      - record: instance:disk_usage:percent
+        expr: |
+          (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100
+
+      # Network receive rate
+      - record: instance:network_receive:bytes_per_second
+        expr: rate(node_network_receive_bytes_total{device!="lo"}[5m])
+
+      # Network transmit rate
+      - record: instance:network_transmit:bytes_per_second
+        expr: rate(node_network_transmit_bytes_total{device!="lo"}[5m])
+

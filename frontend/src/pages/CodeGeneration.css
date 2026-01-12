@@ -1,7 +1,18 @@
+.code-generation-page h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
 .page-subtitle {
-  color: var(--gray-600);
+  color: var(--text-muted);
   margin-bottom: 2rem;
-  font-size: 1rem;
+  font-size: 0.875rem;
+}
+
+.code-section {
+  margin-bottom: 2rem;
 }
 
 .code-header {
@@ -11,53 +22,119 @@
   margin-bottom: 1rem;
 }
 
+.code-header h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .code-container {
-  background-color: var(--gray-900);
-  border-radius: 6px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   overflow-x: auto;
-  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+  position: relative;
 }
 
 .code-container pre {
   margin: 0;
-  color: var(--gray-100);
-  font-family: 'Courier New', monospace;
-  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
   line-height: 1.6;
 }
 
 .code-container code {
-  color: var(--gray-100);
+  color: var(--accent-primary);
+}
+
+.code-container .comment {
+  color: var(--text-muted);
+}
+
+.code-container .string {
+  color: var(--success);
+}
+
+.code-container .number {
+  color: #f59e0b;
+}
+
+.code-container .keyword {
+  color: #8b5cf6;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
 }
 
 .code-instructions {
-  background-color: var(--gray-50);
+  background: var(--card-bg);
   padding: 1.5rem;
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
 }
 
 .code-instructions h3 {
   margin-bottom: 1rem;
   font-size: 1rem;
-  color: var(--gray-900);
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .code-instructions ol {
-  margin-left: 1.5rem;
+  margin-left: 1.25rem;
   line-height: 2;
+  color: var(--text-secondary);
 }
 
 .code-instructions li {
   margin-bottom: 0.5rem;
-  color: var(--gray-700);
+}
+
+.code-instructions li::marker {
+  color: var(--accent-primary);
 }
 
 .code-instructions code {
-  background-color: var(--gray-200);
-  padding: 0.125rem 0.375rem;
+  background: var(--bg-secondary);
+  padding: 0.125rem 0.5rem;
   border-radius: 4px;
-  font-size: 0.875rem;
-  color: var(--gray-900);
+  font-size: 0.8125rem;
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+  border: 1px solid var(--border-color);
 }
 
+.requirements-card {
+  background: var(--warning-bg);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.requirements-card h3 {
+  color: var(--warning);
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.requirements-card p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.requirements-card ul {
+  margin-left: 1.25rem;
+  margin-top: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.requirements-card li {
+  margin-bottom: 0.375rem;
+}

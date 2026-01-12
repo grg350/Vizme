@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import MetricConfigs from './pages/MetricConfigs';
 import ApiKeys from './pages/ApiKeys';
 import CodeGeneration from './pages/CodeGeneration';
+import Alerts from './pages/Alerts';
 import Layout from './components/Layout';
 import './App.css';
 
@@ -29,6 +30,7 @@ function App() {
           }
         >
           <Route index element={<Dashboard />} />
+          <Route path="alerts" element={<Alerts />} />
           <Route path="metric-configs" element={<MetricConfigs />} />
           <Route path="api-keys" element={<ApiKeys />} />
           <Route path="code-generation" element={<CodeGeneration />} />

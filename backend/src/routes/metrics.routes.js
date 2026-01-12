@@ -4,7 +4,6 @@ import { body, validationResult } from 'express-validator';
 import { authenticateApiKey, authenticate } from '../middleware/auth.middleware.js';
 import { metricsLimiter } from '../middleware/rateLimiter.js';
 import { BadRequestError } from '../middleware/errorHandler.js';
-import { query } from '../database/connection.js';
 
 const router = express.Router();
 
@@ -27,34 +26,55 @@ const validateMetricValue = (value, type) => {
   return true;
 };
 
-// Push metric to Prometheus Pushgateway
-const pushToPrometheus = async (metric, userId) => {
-  const { name, type, value, labels } = metric;
+// Format a single metric in Prometheus text format
+const formatMetric = (metric) => {
+  const { name, type, value, labels, help } = metric;
 
-  // Build Prometheus metric format
+  // Build label string
   const labelString = Object.entries(labels || {})
-    .map(([k, v]) => `${k}="${String(v).replace(/"/g, '\\"')}"`)
+    .map(([k, v]) => `${k}="${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`)
     .join(',');
   
-  const metricString = labelString 
+  // Build the metric line
+  const metricLine = labelString 
     ? `${name}{${labelString}} ${value}`
     : `${name} ${value}`;
 
+  // Include TYPE and HELP for better Prometheus compatibility
+  const lines = [];
+  if (help) {
+    lines.push(`# HELP ${name} ${help}`);
+  }
+  lines.push(`# TYPE ${name} ${type}`);
+  lines.push(metricLine);
+  
+  return lines.join('\n');
+};
+
+// Batch push all metrics to Prometheus Pushgateway in a single request
+const pushBatchToPrometheus = async (metrics, userId) => {
+  if (!metrics || metrics.length === 0) {
+    return;
+  }
+
+  // Format all metrics into a single text payload
+  const metricLines = metrics.map(formatMetric);
+  const payload = metricLines.join('\n\n') + '\n';
+
   // Push to Pushgateway
-  // Format: /metrics/job/<job_name>/<label>/<label_value>
   const jobName = `user_${userId}`;
   const pushUrl = `${PUSHGATEWAY_URL}/metrics/job/${jobName}`;
 
   try {
-    await axios.post(pushUrl, metricString, {
+    await axios.post(pushUrl, payload, {
       headers: {
-        'Content-Type': 'text/plain'
+        'Content-Type': 'text/plain; charset=utf-8'
       },
-      timeout: 5000
+      timeout: 10000
     });
   } catch (error) {
-    console.error('Failed to push to Pushgateway:', error.message);
-    throw new Error('Failed to push metric to Prometheus');
+    console.error('Failed to push batch to Pushgateway:', error.message);
+    throw new Error('Failed to push metrics to Prometheus');
   }
 };
 
@@ -118,9 +138,8 @@ router.post('/',
         throw new BadRequestError('No valid metrics to process', errors_list);
       }
 
-      // Push to Prometheus Pushgateway
-      const pushPromises = validMetrics.map(metric => pushToPrometheus(metric, userId));
-      await Promise.allSettled(pushPromises);
+      // Batch push all metrics to Prometheus Pushgateway in a single request
+      await pushBatchToPrometheus(validMetrics, userId);
 
       res.json({
         success: true,

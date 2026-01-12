@@ -2,6 +2,15 @@ import jwt from 'jsonwebtoken';
 import { query } from '../database/connection.js';
 import { UnauthorizedError } from './errorHandler.js';
 
+// Get JWT secret - must be set via environment variable
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return secret;
+};
+
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -11,7 +20,7 @@ export const authenticate = async (req, res, next) => {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
+    const decoded = jwt.verify(token, getJwtSecret());
 
     // Verify user still exists
     const result = await query('SELECT id, email, name FROM users WHERE id = $1', [decoded.userId]);
