@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { metricConfigsAPI } from '../api/metricConfigs';
+import { useToast } from '../components/ToastContainer';
 import './MetricConfigs.css';
 
 const METRIC_TYPES = ['counter', 'gauge', 'histogram', 'summary'];
@@ -48,13 +49,17 @@ function MetricConfigs() {
     try {
       if (editingId) {
         await metricConfigsAPI.update(editingId, formData);
+        showToast('Metric configuration updated successfully!', 'success');
       } else {
         await metricConfigsAPI.create(formData);
+        showToast('Metric configuration created successfully!', 'success');
       }
       await fetchConfigs();
       resetForm();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to save metric config');
+      const errorMsg = err.response?.data?.error || 'Failed to save metric config';
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
     }
   };
 
@@ -78,9 +83,12 @@ function MetricConfigs() {
 
     try {
       await metricConfigsAPI.delete(id);
+      showToast('Metric configuration deleted successfully!', 'success');
       await fetchConfigs();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete metric config');
+      const errorMsg = err.response?.data?.error || 'Failed to delete metric config';
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
     }
   };
 

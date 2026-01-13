@@ -22,12 +22,12 @@ services:
     image: prom/prometheus:latest
     container_name: metrics_prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--storage.tsdb.retention.time=30d'
-      - '--web.enable-lifecycle'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
     ports:
       - "9093:9090"
     volumes:
@@ -48,8 +48,8 @@ services:
     networks:
       - metrics_network
     command:
-      - '--persistence.file=/pushgateway/data'
-      - '--persistence.interval=5m'
+      - "--persistence.file=/pushgateway/data"
+      - "--persistence.interval=5m"
 
   grafana:
     image: grafana/grafana:latest
@@ -113,4 +113,3 @@ volumes:
 networks:
   metrics_network:
     driver: bridge
-
