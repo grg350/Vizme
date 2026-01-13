@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { metricConfigsAPI } from '../api/metricConfigs';
 import './MetricConfigs.css';
 
@@ -18,10 +19,16 @@ function MetricConfigs() {
     labels: []
   });
   const [error, setError] = useState('');
+  const token = useAuthStore((state) => state.token);
+  const authReady = useAuthStore((state) => state.authReady);
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
+    // Block until auth is ready AND token exists
+    if (!authReady || !token || fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchConfigs();
-  }, []);
+  }, [authReady, token]);
 
   const fetchConfigs = async () => {
     try {

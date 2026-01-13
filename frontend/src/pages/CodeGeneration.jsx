@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { codeGenerationAPI } from '../api/codeGeneration';
 import { apiKeysAPI } from '../api/apiKeys';
 import { metricConfigsAPI } from '../api/metricConfigs';
@@ -14,10 +15,16 @@ function CodeGeneration() {
   const [generatedCode, setGeneratedCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const token = useAuthStore((state) => state.token);
+  const authReady = useAuthStore((state) => state.authReady);
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
+    // Block until auth is ready AND token exists
+    if (!authReady || !token || fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchData();
-  }, []);
+  }, [authReady, token]);
 
   const fetchData = async () => {
     try {

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { apiKeysAPI } from '../api/apiKeys';
 import './ApiKeys.css';
 
@@ -9,10 +10,16 @@ function ApiKeys() {
   const [keyName, setKeyName] = useState('');
   const [newKey, setNewKey] = useState(null);
   const [error, setError] = useState('');
+  const token = useAuthStore((state) => state.token);
+  const authReady = useAuthStore((state) => state.authReady);
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
+    // Block until auth is ready AND token exists
+    if (!authReady || !token || fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchKeys();
-  }, []);
+  }, [authReady, token]);
 
   const fetchKeys = async () => {
     try {

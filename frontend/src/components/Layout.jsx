@@ -1,14 +1,14 @@
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { logout as keycloakLogout } from '../services/keycloak';
 import './Layout.css';
 
 function Layout() {
   const { user, logout } = useAuthStore();
-  const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout();
-    navigate('/login');
+    await keycloakLogout();
   };
 
   return (
