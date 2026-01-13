@@ -1,0 +1,662 @@
+/* ================================================
+   Unified Visibility - Custom Keycloak Theme
+   ================================================ */
+
+/* Import font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* Hide default Keycloak branding but show our custom header */
+#kc-header-wrapper,
+.kc-logo-text,
+#kc-page-title,
+.kc-page-title,
+#kc-locale {
+    display: none !important;
+}
+
+/* Show and style our custom brand header */
+#kc-header {
+    display: block !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Reset and base */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    background: #050508 !important;
+    background-color: #050508 !important;
+}
+
+/* Fullscreen dark overlay to cover any remaining white */
+html::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: -50px;
+    right: -50px;
+    bottom: 0;
+    width: calc(100vw + 100px);
+    height: 100vh;
+    background: #050508;
+    background-image: 
+        radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Force container to cover full viewport */
+#kc-container,
+#kc-container-wrapper,
+.login-pf-page {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    background: #050508 !important;
+    background-image: 
+        radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 70%) !important;
+    overflow: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #050508 !important;
+    background-color: #050508 !important;
+    overflow-x: hidden;
+}
+
+/* Background with animated gradient - FULL PAGE DARK */
+html,
+body,
+body.login-pf,
+.login-pf,
+.login-pf-page {
+    background: #050508 !important;
+    background-color: #050508 !important;
+    background-image: 
+        radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 70%) !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+}
+
+body,
+body.login-pf {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Remove ALL white/light backgrounds - AGGRESSIVE */
+#kc-container,
+#kc-container-wrapper,
+.container-fluid,
+.row,
+.col-sm-12,
+.col-md-12,
+.col-lg-12,
+.col-xs-12,
+.card-pf,
+.login-pf-page,
+.login-pf-page .card-pf,
+div[class*="pf-"],
+div[class*="container"],
+div[class*="row"],
+div[class*="col-"],
+.kc-content,
+#kc-content,
+#kc-content > *,
+.login-pf-page-header,
+#kc-form-wrapper,
+#kc-register-form,
+#kc-form-login,
+.login-pf-page .container-fluid,
+.login-pf-page .row,
+.login-pf-page .col-sm-12,
+.login-pf-page .col-md-12,
+#kc-container #kc-content,
+#kc-container #kc-content .col-sm-12,
+#kc-container-wrapper #kc-content,
+#kc-container-wrapper .col-md-12 {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Override PatternFly card backgrounds */
+.card-pf,
+.pf-c-card,
+.pf-c-page__main-section {
+    background: transparent !important;
+    --pf-c-card--BackgroundColor: transparent !important;
+}
+
+/* Force dark background on EVERYTHING */
+html {
+    background: #050508 !important;
+    background-color: #050508 !important;
+}
+
+/* Make ALL elements transparent except the form card */
+*:not(#kc-content-wrapper):not(input):not(button):not(svg):not(path):not(circle):not(line):not(.password-toggle) {
+    background-color: transparent !important;
+}
+
+/* Remove outer wrapper backgrounds */
+body > div,
+body > div > div,
+body > div > div > div,
+body > div > div > div > div,
+body > div > div > div > div > div {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Force the entire viewport to be dark */
+#kc-container,
+#kc-container-wrapper {
+    background: #050508 !important;
+    background-color: #050508 !important;
+    min-height: 100vh !important;
+    width: 100vw !important;
+}
+
+/* Main container - MUCH WIDER */
+#kc-content {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+    background: transparent !important;
+}
+
+@media (min-width: 768px) {
+    #kc-content {
+        max-width: 750px;
+    }
+}
+
+@media (min-width: 1024px) {
+    #kc-content {
+        max-width: 800px;
+    }
+}
+
+/* Remove any white backgrounds */
+.login-pf,
+.login-pf body,
+#kc-container,
+#kc-container-wrapper,
+.kc-content,
+.card-pf {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+#kc-content-wrapper {
+    background: rgba(12, 12, 18, 0.9) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 48px 60px;
+    padding-top: 160px;
+    box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 25px 50px -12px rgba(0, 0, 0, 0.6),
+        0 0 100px rgba(139, 92, 246, 0.1);
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    #kc-content-wrapper {
+        padding: 48px 80px;
+        padding-top: 160px;
+        max-width: 680px;
+    }
+}
+
+@media (min-width: 1024px) {
+    #kc-content-wrapper {
+        padding: 48px 100px;
+        padding-top: 160px;
+        max-width: 720px;
+    }
+}
+
+/* Brand header using pseudo-element */
+#kc-content-wrapper::before {
+    content: '📊';
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35);
+}
+
+/* App name heading - use a wrapper div */
+#kc-form::before {
+    content: 'Unified Visibility';
+    display: block;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+
+#kc-form-wrapper::before {
+    content: 'Monitor your infrastructure in one place';
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 32px;
+    margin-top: -24px;
+}
+
+/* Brand header */
+.brand-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.brand-logo {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+    position: relative;
+}
+
+.brand-logo::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899, #8b5cf6);
+    border-radius: 20px;
+    z-index: -1;
+    opacity: 0.5;
+    filter: blur(8px);
+}
+
+.brand-logo svg {
+    width: 36px;
+    height: 36px;
+    color: white;
+}
+
+.brand-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
+}
+
+/* Form groups */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label, label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6) !important;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Input fields */
+.form-input,
+#username,
+#password,
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    width: 100%;
+    padding: 16px 18px;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px;
+    color: #ffffff !important;
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.form-input::placeholder,
+#username::placeholder,
+#password::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.form-input:focus,
+#username:focus,
+#password:focus,
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none !important;
+    border-color: #8b5cf6 !important;
+    background: rgba(139, 92, 246, 0.05) !important;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+/* Form options (remember me & forgot password) */
+.form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #8b5cf6;
+    cursor: pointer;
+}
+
+.checkbox-wrapper label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin: 0 !important;
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+.forgot-link {
+    font-size: 13px;
+    color: #8b5cf6 !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.forgot-link:hover {
+    color: #a78bfa !important;
+    text-decoration: none;
+}
+
+/* Submit button */
+.submit-btn,
+#kc-login,
+input[type="submit"] {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+    border: none !important;
+    border-radius: 12px;
+    color: #ffffff !important;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: none;
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-btn:hover,
+#kc-login:hover,
+input[type="submit"]:hover {
+    background: linear-gradient(135deg, #9333ea 0%, #8b5cf6 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(139, 92, 246, 0.35);
+}
+
+.submit-btn:active,
+#kc-login:active {
+    transform: translateY(0);
+}
+
+/* Register link */
+.register-link {
+    text-align: center;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.register-link span {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+}
+
+.register-link a {
+    color: #8b5cf6 !important;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 6px;
+    transition: color 0.2s ease;
+}
+
+.register-link a:hover {
+    color: #a78bfa !important;
+}
+
+/* Error messages */
+.error-message,
+.alert-error,
+#input-error,
+.kc-feedback-text {
+    display: block;
+    margin-top: 8px;
+    padding: 12px 16px;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    color: #fca5a5 !important;
+    font-size: 13px;
+}
+
+/* Alert messages */
+.alert {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    color: #fca5a5 !important;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border: 1px solid rgba(245, 158, 11, 0.2) !important;
+    color: #fcd34d !important;
+}
+
+.alert-success {
+    background: rgba(34, 197, 94, 0.1) !important;
+    border: 1px solid rgba(34, 197, 94, 0.2) !important;
+    color: #86efac !important;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    color: #93c5fd !important;
+}
+
+/* Social providers (if any) */
+#kc-social-providers {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#kc-social-providers ul {
+    list-style: none;
+    padding: 0;
+}
+
+#kc-social-providers li {
+    margin-bottom: 12px;
+}
+
+#kc-social-providers a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#kc-social-providers a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Hide unwanted elements */
+#kc-info-wrapper,
+.kc-social-section,
+#kc-form-options {
+    display: none;
+}
+
+/* Registration page adjustments */
+#kc-register-form .form-group {
+    margin-bottom: 20px;
+}
+
+/* Footer / powered by text - hide it */
+#kc-content::after {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    #kc-content-wrapper {
+        padding: 36px 24px;
+        border-radius: 20px;
+    }
+    
+    .brand-logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .brand-logo svg {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .brand-title {
+        font-size: 24px;
+    }
+}
+
+/* Smooth animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#kc-content-wrapper {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Password toggle eye icon */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.password-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Adjust input padding for the eye icon */
+.password-wrapper input {
+    padding-right: 50px !important;
+}

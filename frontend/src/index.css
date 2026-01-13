@@ -1,9 +1,34 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import "tailwindcss";
+
+@theme {
+  --font-family-sans: 'Outfit', system-ui, sans-serif;
+  
+  --color-primary-50: #f5f3ff;
+  --color-primary-100: #ede9fe;
+  --color-primary-200: #ddd6fe;
+  --color-primary-300: #c4b5fd;
+  --color-primary-400: #a78bfa;
+  --color-primary-500: #8b5cf6;
+  --color-primary-600: #7c3aed;
+  --color-primary-700: #6d28d9;
+  --color-primary-800: #5b21b6;
+  --color-primary-900: #4c1d95;
+  
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  @keyframes glow {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
 }
 
+/* Legacy CSS variables for other pages */
 :root {
   --primary: #3b82f6;
   --primary-dark: #2563eb;
@@ -24,27 +49,63 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--gray-50);
+}
+
+/* Keep existing component styles for other pages */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.auth-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.auth-card h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
   color: var(--gray-900);
-  line-height: 1.6;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.auth-subtitle {
+  color: var(--gray-600);
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
 }
 
-button {
-  cursor: pointer;
-  font-family: inherit;
+.auth-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: var(--gray-600);
+  font-size: 0.875rem;
 }
 
-input, textarea, select {
-  font-family: inherit;
+.auth-footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
 }
 
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--gray-500);
+  font-size: 0.75rem;
+}
