@@ -1,16 +1,28 @@
 import { useEffect, useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
-import { initKeycloak, isAuthenticated, getToken } from './services/keycloak';
+import { initKeycloak, isAuthenticated, getToken, register } from './services/keycloak';
 import { authAPI } from './api/auth';
 import Login from './pages/Login';
-import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import MetricConfigs from './pages/MetricConfigs';
 import ApiKeys from './pages/ApiKeys';
 import CodeGeneration from './pages/CodeGeneration';
 import Layout from './components/Layout';
 import './App.css';
+
+// Component that redirects directly to Keycloak registration
+function SignupRedirect() {
+  useEffect(() => {
+    register();
+  }, []);
+  
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#050508', color: '#fff' }}>
+      <div>Redirecting to registration...</div>
+    </div>
+  );
+}
 
 function PrivateRoute({ children }) {
   const isAuthenticatedStore = useAuthStore((state) => state.isAuthenticated);
@@ -89,7 +101,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/signup" element={<SignupRedirect />} />
         <Route
           path="/"
           element={

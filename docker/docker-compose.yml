@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -29,7 +29,7 @@ services:
       - '--storage.tsdb.retention.time=30d'
       - '--web.enable-lifecycle'
     ports:
-      - "9093:9090"
+      - "9094:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -42,7 +42,7 @@ services:
     image: prom/pushgateway:latest
     container_name: metrics_pushgateway
     ports:
-      - "9091:9091"
+      - "9095:9091"
     volumes:
       - pushgateway_data:/pushgateway
     networks:
@@ -55,7 +55,7 @@ services:
     image: grafana/grafana:latest
     container_name: metrics_grafana
     ports:
-      - "3003:3000"
+      - "3004:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -75,7 +75,7 @@ services:
       dockerfile: Dockerfile
     container_name: metrics_backend
     ports:
-      - "3002:3000"
+      - "3005:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000

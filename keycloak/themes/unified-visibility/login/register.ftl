@@ -93,6 +93,11 @@
             </div>
         </form>
         
+        <div class="register-link">
+            <span>Already have an account?</span>
+            <a href="${url.loginUrl}">Sign in</a>
+        </div>
+        
         <script>
             function togglePassword(inputId) {
                 var input = document.getElementById(inputId);
@@ -110,10 +115,5 @@
                 }
             }
         </script>
-    <#elseif section = "info">
-        <div class="register-link">
-            <span>Already have an account?</span>
-            <a href="${url.loginUrl}">Sign in</a>
-        </div>
     </#if>
 </@layout.registrationLayout>

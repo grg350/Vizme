@@ -577,10 +577,11 @@ input[type="submit"]:hover {
 }
 
 /* Hide unwanted elements */
-#kc-info-wrapper,
 .kc-social-section,
-#kc-form-options {
-    display: none;
+#kc-form-options,
+#kc-info-wrapper,
+#kc-info {
+    display: none !important;
 }
 
 /* Registration page adjustments */

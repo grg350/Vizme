@@ -59,6 +59,13 @@
                     </form>
                 </#if>
             </div>
+            
+            <#if realm.password && realm.registrationAllowed && !registrationDisabled??>
+                <div class="register-link">
+                    <span>Don't have an account?</span>
+                    <a tabindex="6" href="${url.registrationUrl}">Create one</a>
+                </div>
+            </#if>
         </div>
         
         <script>
@@ -78,12 +85,5 @@
                 }
             }
         </script>
-    <#elseif section = "info">
-        <#if realm.password && realm.registrationAllowed && !registrationDisabled??>
-            <div class="register-link">
-                <span>${msg("noAccount")}</span>
-                <a tabindex="6" href="${url.registrationUrl}">${msg("doRegister")}</a>
-            </div>
-        </#if>
     </#if>
 </@layout.registrationLayout>
