@@ -36,9 +36,12 @@ const pushToPrometheus = async (metric, userId) => {
     .map(([k, v]) => `${k}="${String(v).replace(/"/g, '\\"')}"`)
     .join(',');
   
-  const metricString = labelString 
+    const metricLine = labelString 
     ? `${name}{${labelString}} ${value}`
     : `${name} ${value}`;
+
+  // Pushgateway requires TYPE declaration and trailing newline
+  const metricString = `# TYPE ${name} ${type}\n${metricLine}\n`;
 
   // Push to Pushgateway
   // Format: /metrics/job/<job_name>/<label>/<label_value>
