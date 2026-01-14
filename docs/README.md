@@ -3,6 +3,7 @@
 ## Overview
 
 Metrics Tracker is a comprehensive metrics collection and visualization platform that allows users to:
+
 - Configure custom metrics
 - Generate tracking code for client websites
 - Collect metrics via REST API
@@ -19,6 +20,8 @@ Metrics Tracker is a comprehensive metrics collection and visualization platform
 6. [Security](#security)
 
 ## Architecture
+
+This is an architecture for the project.
 
 ### System Components
 
@@ -54,6 +57,7 @@ Metrics Tracker is a comprehensive metrics collection and visualization platform
 ### Technology Stack
 
 **Backend:**
+
 - Node.js 20+ with Express 5
 - PostgreSQL 15 (User data, configurations)
 - JWT for authentication
@@ -62,12 +66,14 @@ Metrics Tracker is a comprehensive metrics collection and visualization platform
 - express-rate-limit for rate limiting
 
 **Frontend:**
+
 - React 18 with Vite
 - React Router for routing
 - Zustand for state management
 - Axios for API calls
 
 **Infrastructure:**
+
 - Docker & Docker Compose
 - Prometheus (Time-series database)
 - Prometheus Pushgateway (Metrics ingestion)
@@ -95,20 +101,25 @@ Metrics Tracker is a comprehensive metrics collection and visualization platform
 ### Backend Setup
 
 1. **Navigate to backend directory:**
+
    ```bash
    cd backend
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment:**
+
    ```bash
    cp .env.example .env
    ```
+
    Edit `.env` with your configuration:
+
    ```env
    PORT=3000
    DB_HOST=localhost
@@ -131,17 +142,20 @@ Metrics Tracker is a comprehensive metrics collection and visualization platform
 ### Frontend Setup
 
 1. **Navigate to frontend directory:**
+
    ```bash
    cd frontend
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment:**
    Create `.env` file:
+
    ```env
    VITE_API_BASE_URL=http://localhost:3000
    VITE_GRAFANA_URL=http://localhost:3001
@@ -155,12 +169,14 @@ Metrics Tracker is a comprehensive metrics collection and visualization platform
 ### Docker Setup (Recommended)
 
 1. **Start all services:**
+
    ```bash
    cd docker
    docker-compose up -d
    ```
 
    This will start:
+
    - PostgreSQL (port 5432)
    - Prometheus (port 9090)
    - Pushgateway (port 9091)
@@ -168,11 +184,13 @@ Metrics Tracker is a comprehensive metrics collection and visualization platform
    - Backend (port 3000)
 
 2. **Check service status:**
+
    ```bash
    docker-compose ps
    ```
 
 3. **View logs:**
+
    ```bash
    docker-compose logs -f backend
    ```
@@ -187,6 +205,7 @@ Metrics Tracker is a comprehensive metrics collection and visualization platform
 The database tables are automatically created on first server start. The migration runs in `src/database/connection.js`.
 
 **Manual migration (if needed):**
+
 ```bash
 cd backend
 npm run migrate
@@ -195,6 +214,7 @@ npm run migrate
 ## API Documentation
 
 ### Base URL
+
 ```
 http://localhost:3000/api/v1
 ```
@@ -202,6 +222,7 @@ http://localhost:3000/api/v1
 ### Authentication
 
 Most endpoints require JWT authentication. Include the token in the Authorization header:
+
 ```
 Authorization: Bearer <access_token>
 ```
@@ -211,6 +232,7 @@ Authorization: Bearer <access_token>
 #### Authentication
 
 **POST /auth/signup**
+
 - **Description**: Register a new user
 - **Rate Limit**: 5 requests/minute
 - **Request Body:**
@@ -238,6 +260,7 @@ Authorization: Bearer <access_token>
   ```
 
 **POST /auth/signin**
+
 - **Description**: Sign in existing user
 - **Rate Limit**: 5 requests/minute
 - **Request Body:**
@@ -249,6 +272,7 @@ Authorization: Bearer <access_token>
   ```
 
 **POST /auth/refresh**
+
 - **Description**: Refresh access token
 - **Request Body:**
   ```json
@@ -260,6 +284,7 @@ Authorization: Bearer <access_token>
 #### API Keys
 
 **GET /api-keys**
+
 - **Description**: Get all API keys for authenticated user
 - **Auth**: Required
 - **Response:**
@@ -279,6 +304,7 @@ Authorization: Bearer <access_token>
   ```
 
 **POST /api-keys**
+
 - **Description**: Create new API key
 - **Auth**: Required
 - **Request Body:**
@@ -289,6 +315,7 @@ Authorization: Bearer <access_token>
   ```
 
 **PATCH /api-keys/:id**
+
 - **Description**: Update API key (name or active status)
 - **Auth**: Required
 - **Request Body:**
@@ -300,20 +327,24 @@ Authorization: Bearer <access_token>
   ```
 
 **DELETE /api-keys/:id**
+
 - **Description**: Delete API key
 - **Auth**: Required
 
 #### Metric Configurations
 
 **GET /metric-configs**
+
 - **Description**: Get all metric configurations
 - **Auth**: Required
 
 **GET /metric-configs/:id**
+
 - **Description**: Get single metric configuration
 - **Auth**: Required
 
 **POST /metric-configs**
+
 - **Description**: Create metric configuration
 - **Auth**: Required
 - **Request Body:**
@@ -325,24 +356,27 @@ Authorization: Bearer <access_token>
     "description": "Total number of user clicks",
     "help_text": "Counter for tracking user clicks",
     "labels": [
-      {"name": "page", "value": ""},
-      {"name": "button", "value": ""}
+      { "name": "page", "value": "" },
+      { "name": "button", "value": "" }
     ]
   }
   ```
 - **Metric Types**: `counter`, `gauge`, `histogram`, `summary`
 
 **PATCH /metric-configs/:id**
+
 - **Description**: Update metric configuration
 - **Auth**: Required
 
 **DELETE /metric-configs/:id**
+
 - **Description**: Delete metric configuration
 - **Auth**: Required
 
 #### Code Generation
 
 **POST /code-generation**
+
 - **Description**: Generate tracking code snippet
 - **Auth**: Required
 - **Request Body:**
@@ -369,6 +403,7 @@ Authorization: Bearer <access_token>
 #### Metrics Ingestion
 
 **POST /metrics**
+
 - **Description**: Ingest metrics from client
 - **Auth**: API Key (X-API-Key header)
 - **Rate Limit**: 100 requests/minute per API key
@@ -402,6 +437,7 @@ Authorization: Bearer <access_token>
 #### Health Check
 
 **GET /health**
+
 - **Description**: Health check endpoint
 - **Auth**: Not required
 - **Response:**
@@ -417,12 +453,14 @@ Authorization: Bearer <access_token>
 ## User Flow
 
 ### 1. Registration and Login
+
 - User visits the website
 - User signs up with email and password
 - System creates account and returns JWT tokens
 - User is redirected to dashboard
 
 ### 2. Metric Configuration
+
 - User navigates to "Metric Configurations"
 - User creates a new metric configuration:
   - Name: "User Clicks"
@@ -432,12 +470,14 @@ Authorization: Bearer <access_token>
 - System validates and stores configuration
 
 ### 3. API Key Generation
+
 - User navigates to "API Keys"
 - User creates a new API key with a name
 - System generates unique API key (format: `mk_...`)
 - **Important**: Key is shown only once - user must copy it
 
 ### 4. Code Generation
+
 - User navigates to "Code Generation"
 - User selects:
   - API Key
@@ -447,15 +487,18 @@ Authorization: Bearer <access_token>
 - User copies code
 
 ### 5. Client Integration
+
 - User pastes code before `</body>` tag in their website
 - Code automatically initializes and starts tracking
 
 ### 6. Metric Collection
+
 - Client website sends metrics to `/api/v1/metrics` endpoint
 - Backend validates and pushes to Prometheus Pushgateway
 - Prometheus scrapes from Pushgateway and stores metrics
 
 ### 7. Visualization
+
 - User opens Grafana (http://localhost:3001)
 - User queries Prometheus for metrics
 - User creates dashboards and visualizations
@@ -465,18 +508,21 @@ Authorization: Bearer <access_token>
 ### Production Considerations
 
 1. **Environment Variables:**
+
    - Use strong `JWT_SECRET` (minimum 32 characters)
    - Use secure database credentials
    - Configure proper CORS origins
    - Set `NODE_ENV=production`
 
 2. **Database:**
+
    - Use managed PostgreSQL service
    - Enable SSL connections
    - Set up regular backups
    - Configure connection pooling
 
 3. **Security:**
+
    - Enable HTTPS
    - Use secure cookie settings
    - Implement proper rate limiting
@@ -484,6 +530,7 @@ Authorization: Bearer <access_token>
    - Regular security updates
 
 4. **Monitoring:**
+
    - Set up application monitoring (e.g., PM2, New Relic)
    - Monitor Prometheus metrics
    - Set up alerting in Grafana
@@ -498,11 +545,13 @@ Authorization: Bearer <access_token>
 ### Docker Production Deployment
 
 1. **Build images:**
+
    ```bash
    docker-compose build
    ```
 
 2. **Use environment file:**
+
    ```bash
    docker-compose --env-file .env.production up -d
    ```
@@ -515,12 +564,14 @@ Authorization: Bearer <access_token>
 ## Security
 
 ### Authentication
+
 - Passwords hashed with bcrypt (12 rounds)
 - JWT tokens with short expiration (15min access, 7d refresh)
 - Refresh token rotation on use
 - Rate limiting on auth endpoints (5 req/min)
 
 ### API Security
+
 - API key authentication for metrics endpoint
 - Rate limiting (100 req/min per API key)
 - Input validation and sanitization
@@ -528,6 +579,7 @@ Authorization: Bearer <access_token>
 - Helmet.js for security headers
 
 ### Data Protection
+
 - SQL injection prevention (parameterized queries)
 - XSS prevention (input sanitization)
 - HTTPS in production
@@ -536,24 +588,28 @@ Authorization: Bearer <access_token>
 ## Troubleshooting
 
 ### Backend won't start
+
 - Check PostgreSQL is running
 - Verify environment variables
 - Check port 3000 is available
 - Review error logs
 
 ### Database connection errors
+
 - Verify database credentials
 - Check PostgreSQL is accessible
 - Ensure database exists
 - Check network connectivity
 
 ### Metrics not appearing in Grafana
+
 - Verify Prometheus is scraping Pushgateway
 - Check Pushgateway is receiving metrics
 - Verify metric names match queries
 - Check Grafana datasource configuration
 
 ### Frontend can't connect to backend
+
 - Verify backend is running
 - Check CORS configuration
 - Verify API base URL in frontend .env
@@ -562,4 +618,3 @@ Authorization: Bearer <access_token>
 ## Support
 
 For issues or questions, please refer to the project repository or contact the development team.
-
