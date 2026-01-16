@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../api/auth';
 import { useToast } from '../components/ToastContainer';
+import Logo from '../components/Logo';
 import './Auth.css';
 
 function Signup() {
@@ -39,6 +40,9 @@ function Signup() {
   return (
     <div className="auth-container">
       <div className="auth-card">
+        <div className="auth-logo">
+          <Logo size="large" />
+        </div>
         <h1>Sign Up</h1>
         <p className="auth-subtitle">Create your account to get started.</p>
         

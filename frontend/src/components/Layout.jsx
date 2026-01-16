@@ -1,7 +1,8 @@
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
-import { useThemeStore } from '../store/themeStore';
-import './Layout.css';
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
+import { useThemeStore } from "../store/themeStore";
+import Logo from "./Logo";
+import "./Layout.css";
 
 function Layout() {
   const { user, logout } = useAuthStore();
@@ -11,12 +12,12 @@ function Layout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const isActive = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
+    if (path === "/") {
+      return location.pathname === "/";
     }
     return location.pathname.startsWith(path);
   };
@@ -26,43 +27,46 @@ function Layout() {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-brand">
-            <span className="brand-icon">📊</span>
-            <span>Metrics Tracker</span>
+            <Logo size="default" />
           </Link>
           <div className="nav-links">
-            <Link 
-              to="/" 
-              className={`nav-link ${isActive('/') ? 'active' : ''}`}
+            <Link
+              to="/"
+              className={`nav-link ${isActive("/") ? "active" : ""}`}
             >
               Dashboard
             </Link>
-            <Link 
-              to="/metric-configs" 
-              className={`nav-link ${isActive('/metric-configs') ? 'active' : ''}`}
+            <Link
+              to="/metric-configs"
+              className={`nav-link ${
+                isActive("/metric-configs") ? "active" : ""
+              }`}
             >
               Metric Configs
             </Link>
-            <Link 
-              to="/api-keys" 
-              className={`nav-link ${isActive('/api-keys') ? 'active' : ''}`}
+            <Link
+              to="/api-keys"
+              className={`nav-link ${isActive("/api-keys") ? "active" : ""}`}
             >
               API Keys
             </Link>
-            <Link 
-              to="/code-generation" 
-              className={`nav-link ${isActive('/code-generation') ? 'active' : ''}`}
+            <Link
+              to="/code-generation"
+              className={`nav-link ${
+                isActive("/code-generation") ? "active" : ""
+              }`}
             >
               Code Generation
             </Link>
           </div>
           <div className="nav-user">
-            <button 
-              onClick={toggleTheme} 
+            <button
+              onClick={toggleTheme}
               className="theme-toggle"
               aria-label="Toggle theme"
-              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
             >
-              {theme === 'light' ? '🌙' : '☀️'}
+              {theme === "light" ? "🌙" : "☀️"}
             </button>
             <span className="user-email">{user?.email}</span>
             <button onClick={handleLogout} className="btn btn-secondary">
@@ -81,4 +85,3 @@ function Layout() {
 }
 
 export default Layout;
-

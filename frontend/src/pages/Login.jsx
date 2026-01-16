@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../api/auth';
 import { useToast } from '../components/ToastContainer';
+import Logo from '../components/Logo';
 import './Auth.css';
 
 function Login() {
@@ -38,6 +39,9 @@ function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
+        <div className="auth-logo">
+          <Logo size="large" />
+        </div>
         <h1>Sign In</h1>
         <p className="auth-subtitle">Welcome back! Please sign in to your account.</p>
         

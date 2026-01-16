@@ -52,6 +52,44 @@
   }
 }
 
+.auth-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  position: relative;
+  width: 100%;
+  min-height: 80px;
+}
+
+/* Professional logo styling in auth pages */
+.auth-logo .logo-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+  transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] .auth-logo .logo-container {
+  filter: drop-shadow(0 2px 12px rgba(255, 255, 255, 0.08));
+}
+
+.auth-logo .logo-container:hover {
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.12));
+}
+
+[data-theme="dark"] .auth-logo .logo-container:hover {
+  filter: drop-shadow(0 4px 20px rgba(255, 255, 255, 0.12));
+}
+
+/* Ensure logo wrapper is centered */
+.auth-logo .logo-wrapper {
+  margin: 0 auto;
+}
+
 .auth-card h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -61,6 +99,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-align: center;
 }
 
 .auth-subtitle {
