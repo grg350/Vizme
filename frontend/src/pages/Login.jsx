@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../api/auth';
+import { useToast } from '../components/ToastContainer';
+import Logo from '../components/Logo';
 import './Auth.css';
 
 function Login() {
@@ -11,6 +13,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,9 +25,12 @@ function Login() {
       const { user, accessToken, refreshToken } = response.data;
       
       setAuth(user, accessToken, refreshToken);
-      navigate('/');
+      showToast('Welcome back! Redirecting...', 'success', 2000);
+      setTimeout(() => navigate('/'), 500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
+      const errorMsg = err.response?.data?.error || 'Login failed. Please try again.';
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
     } finally {
       setLoading(false);
     }
@@ -33,6 +39,9 @@ function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
+        <div className="auth-logo">
+          <Logo size="large" />
+        </div>
         <h1>Sign In</h1>
         <p className="auth-subtitle">Welcome back! Please sign in to your account.</p>
         

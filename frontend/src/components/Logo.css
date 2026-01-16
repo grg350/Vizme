@@ -1,0 +1,281 @@
+/* Logo Container - Professional centered alignment */
+.logo-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  line-height: 0;
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+/* Logo Wrapper - Ensures perfect stacking and alignment */
+.logo-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Base logo image styles - Professional rendering */
+.logo-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+  vertical-align: middle;
+}
+
+/* Light mode logo - Default visible */
+.logo-light {
+  opacity: 1;
+  position: relative;
+  z-index: 2;
+  transform: scale(1);
+}
+
+/* Dark mode logo - Hidden by default, positioned absolutely for perfect overlap */
+.logo-dark {
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+}
+
+/* Dark theme - Show dark logo, hide light logo */
+[data-theme="dark"] .logo-light {
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+[data-theme="dark"] .logo-dark {
+  opacity: 1;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Size variants - Professional scaling */
+.logo-default .logo-wrapper {
+  max-width: 180px;
+  max-height: 40px;
+}
+
+.logo-default .logo-image {
+  max-width: 180px;
+  max-height: 40px;
+  width: auto;
+  height: auto;
+}
+
+.logo-small .logo-wrapper {
+  max-width: 126px;
+  max-height: 28px;
+}
+
+.logo-small .logo-image {
+  max-width: 126px;
+  max-height: 28px;
+  width: auto;
+  height: auto;
+}
+
+.logo-large .logo-wrapper {
+  max-width: 270px;
+  max-height: 60px;
+}
+
+.logo-large .logo-image {
+  max-width: 270px;
+  max-height: 60px;
+  width: auto;
+  height: auto;
+}
+
+.logo-xlarge .logo-wrapper {
+  max-width: 360px;
+  max-height: 80px;
+}
+
+.logo-xlarge .logo-image {
+  max-width: 360px;
+  max-height: 80px;
+  width: auto;
+  height: auto;
+}
+
+/* Hover effect - Subtle and professional */
+.logo-container:hover .logo-dark {
+  transform: translate(-50%, -50%) scale(1.02);
+}
+
+.logo-container:hover .logo-light {
+  transform: scale(1.02);
+}
+
+.logo-container:active .logo-dark {
+  transform: translate(-50%, -50%) scale(0.98);
+}
+
+.logo-container:active .logo-light {
+  transform: scale(0.98);
+}
+
+/* Responsive design - Mobile optimization */
+@media (max-width: 768px) {
+  .logo-default .logo-wrapper {
+    max-width: 144px;
+    max-height: 32px;
+  }
+  
+  .logo-default .logo-image {
+    max-width: 144px;
+    max-height: 32px;
+  }
+  
+  .logo-small .logo-wrapper {
+    max-width: 108px;
+    max-height: 24px;
+  }
+  
+  .logo-small .logo-image {
+    max-width: 108px;
+    max-height: 24px;
+  }
+  
+  .logo-large .logo-wrapper {
+    max-width: 216px;
+    max-height: 48px;
+  }
+  
+  .logo-large .logo-image {
+    max-width: 216px;
+    max-height: 48px;
+  }
+  
+  .logo-xlarge .logo-wrapper {
+    max-width: 288px;
+    max-height: 64px;
+  }
+  
+  .logo-xlarge .logo-image {
+    max-width: 288px;
+    max-height: 64px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .logo-default .logo-wrapper {
+    max-width: 120px;
+    max-height: 27px;
+  }
+  
+  .logo-default .logo-image {
+    max-width: 120px;
+    max-height: 27px;
+  }
+  
+  .logo-large .logo-wrapper {
+    max-width: 180px;
+    max-height: 40px;
+  }
+  
+  .logo-large .logo-image {
+    max-width: 180px;
+    max-height: 40px;
+  }
+}
+
+/* High DPI displays - Ensure crisp rendering */
+@media (-webkit-min-device-pixel-ratio: 2), 
+       (min-resolution: 192dpi),
+       (min-resolution: 2dppx) {
+  .logo-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: auto;
+  }
+}
+
+/* Reduced motion preference - Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .logo-image {
+    transition: opacity 0.2s ease;
+  }
+  
+  .logo-container:hover .logo-dark,
+  .logo-container:active .logo-dark {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  
+  .logo-container:hover .logo-light,
+  .logo-container:active .logo-light {
+    transform: scale(1);
+  }
+}
+
+/* High contrast mode support - Accessibility */
+@media (prefers-contrast: high) {
+  .logo-image {
+    filter: contrast(1.15) brightness(1.05);
+  }
+}
+
+/* Print styles */
+@media print {
+  .logo-container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .logo-dark {
+    display: none;
+  }
+  
+  .logo-light {
+    opacity: 1 !important;
+    filter: grayscale(100%) contrast(1.2);
+  }
+}
+
+/* Focus state for accessibility */
+.logo-container:focus-visible {
+  outline: 2px solid var(--primary, #3b82f6);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Ensure perfect centering in flex containers */
+.logo-container[class*="logo-"] {
+  margin: 0 auto;
+}
