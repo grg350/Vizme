@@ -1,35 +1,36 @@
-version: '3.8'
-
 services:
+  # Optional: Keep local postgres for development/testing
+  # Comment out or remove if only using external DB
   postgres:
     image: postgres:15-alpine
     container_name: metrics_postgres
     environment:
-      POSTGRES_DB: metrics_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-metrics_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - metrics_network
+    profiles:
+      - local-db # Only start with: docker compose --profile local-db up
 
+  # ... (prometheus, pushgateway, grafana stay the same) ...
   prometheus:
     image: prom/prometheus:latest
     container_name: metrics_prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--storage.tsdb.retention.time=30d'
-      - '--web.enable-lifecycle'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
     ports:
       - "9090:9090"
     volumes:
@@ -38,7 +39,20 @@ services:
     networks:
       - metrics_network
     depends_on:
-      - backend
+      - pushgateway
+
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: metrics_pushgateway
+    ports:
+      - "9091:9091"
+    volumes:
+      - pushgateway_data:/pushgateway
+    networks:
+      - metrics_network
+    command:
+      - "--persistence.file=/pushgateway/data"
+      - "--persistence.interval=5m"
 
   grafana:
     image: grafana/grafana:latest
@@ -65,28 +79,48 @@ services:
     container_name: metrics_backend
     ports:
       - "3000:3000"
+    env_file:
+      - .env # Load environment variables from .env file
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
       - PORT=3000
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=metrics_db
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      # Database connection - using env_file values
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SSL=${DB_SSL:-false}
+      # Application config
       - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
-      - GRAFANA_URL=http://localhost:3001
-      - PROMETHEUS_URL=http://localhost:9090
-      - FRONTEND_URL=http://localhost:5173
-      - API_BASE_URL=http://localhost:3000
+      - PUSHGATEWAY_URL=${PUSHGATEWAY_URL:-http://pushgateway:9091}
+      - GRAFANA_URL=${GRAFANA_URL:-http://localhost:3001}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+      - API_BASE_URL=${API_BASE_URL:-http://localhost:3000}
     volumes:
       - ../backend:/app
       - /app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
+    # Remove postgres dependency if using external DB only
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
     networks:
       - metrics_network
     restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:
