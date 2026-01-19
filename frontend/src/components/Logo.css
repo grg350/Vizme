@@ -34,8 +34,8 @@
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
   image-rendering: pixelated;
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   user-select: none;
@@ -156,37 +156,37 @@
     max-width: 144px;
     max-height: 32px;
   }
-  
+
   .logo-default .logo-image {
     max-width: 144px;
     max-height: 32px;
   }
-  
+
   .logo-small .logo-wrapper {
     max-width: 108px;
     max-height: 24px;
   }
-  
+
   .logo-small .logo-image {
     max-width: 108px;
     max-height: 24px;
   }
-  
+
   .logo-large .logo-wrapper {
     max-width: 216px;
     max-height: 48px;
   }
-  
+
   .logo-large .logo-image {
     max-width: 216px;
     max-height: 48px;
   }
-  
+
   .logo-xlarge .logo-wrapper {
     max-width: 288px;
     max-height: 64px;
   }
-  
+
   .logo-xlarge .logo-image {
     max-width: 288px;
     max-height: 64px;
@@ -199,17 +199,17 @@
     max-width: 120px;
     max-height: 27px;
   }
-  
+
   .logo-default .logo-image {
     max-width: 120px;
     max-height: 27px;
   }
-  
+
   .logo-large .logo-wrapper {
     max-width: 180px;
     max-height: 40px;
   }
-  
+
   .logo-large .logo-image {
     max-width: 180px;
     max-height: 40px;
@@ -217,9 +217,9 @@
 }
 
 /* High DPI displays - Ensure crisp rendering */
-@media (-webkit-min-device-pixel-ratio: 2), 
-       (min-resolution: 192dpi),
-       (min-resolution: 2dppx) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi),
+(min-resolution: 2dppx) {
   .logo-image {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
@@ -232,12 +232,12 @@
   .logo-image {
     transition: opacity 0.2s ease;
   }
-  
+
   .logo-container:hover .logo-dark,
   .logo-container:active .logo-dark {
     transform: translate(-50%, -50%) scale(1);
   }
-  
+
   .logo-container:hover .logo-light,
   .logo-container:active .logo-light {
     transform: scale(1);
@@ -257,11 +257,11 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  
+
   .logo-dark {
     display: none;
   }
-  
+
   .logo-light {
     opacity: 1 !important;
     filter: grayscale(100%) contrast(1.2);
