@@ -29,6 +29,17 @@ function Layout() {
     return location.pathname.startsWith(path);
   };
 
+  const isOnboardingRoute = useMemo(() => {
+    return (
+      location.pathname === "/metric-configs" ||
+      location.pathname.startsWith("/metric-configs/") ||
+      location.pathname === "/api-keys" ||
+      location.pathname.startsWith("/api-keys/") ||
+      location.pathname === "/code-generation" ||
+      location.pathname.startsWith("/code-generation/")
+    );
+  }, [location.pathname]);
+
   return (
     <div className="layout">
       <nav className="navbar">
@@ -37,34 +48,61 @@ function Layout() {
             <Logo size="default" />
           </Link>
           <div className="nav-links">
-            <Link
-              to="/"
-              className={`nav-link ${isActive("/") ? "active" : ""}`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/metric-configs"
-              className={`nav-link ${
-                isActive("/metric-configs") ? "active" : ""
-              }`}
-            >
-              Metric Configs
-            </Link>
-            <Link
-              to="/api-keys"
-              className={`nav-link ${isActive("/api-keys") ? "active" : ""}`}
-            >
-              API Keys
-            </Link>
-            <Link
-              to="/code-generation"
-              className={`nav-link ${
-                isActive("/code-generation") ? "active" : ""
-              }`}
-            >
-              Code Gen
-            </Link>
+            {isOnboardingRoute ? (
+              <>
+                <Link
+                  to="/metric-configs"
+                  className={`nav-link ${isOnboardingRoute ? "active" : ""}`}
+                >
+                  Onboarding
+                </Link>
+                <a
+                  href="#"
+                  className="nav-link"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  Documentation
+                </a>
+                <a
+                  href="#"
+                  className="nav-link"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  Support
+                </a>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/"
+                  className={`nav-link ${isActive("/") ? "active" : ""}`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/metric-configs"
+                  className={`nav-link ${
+                    isActive("/metric-configs") ? "active" : ""
+                  }`}
+                >
+                  Metric Configs
+                </Link>
+                <Link
+                  to="/api-keys"
+                  className={`nav-link ${isActive("/api-keys") ? "active" : ""}`}
+                >
+                  API Keys
+                </Link>
+                <Link
+                  to="/code-generation"
+                  className={`nav-link ${
+                    isActive("/code-generation") ? "active" : ""
+                  }`}
+                >
+                  Code Gen
+                </Link>
+              </>
+            )}
           </div>
           <div className="nav-user">
             <button
