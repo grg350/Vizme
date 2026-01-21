@@ -36,4 +36,3 @@ function Logo({ className = '', size = 'default' }) {
 }
 
 export default Logo;
-

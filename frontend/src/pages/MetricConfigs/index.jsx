@@ -220,4 +220,3 @@ function MetricConfigs() {
 }
 
 export default MetricConfigs;
-
