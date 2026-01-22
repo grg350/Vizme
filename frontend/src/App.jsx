@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import MetricConfigs from './pages/MetricConfigs';
+import MetricConfigurationsList from './pages/MetricConfigurationsList';
 import ApiKeys from './pages/ApiKeys';
 import CodeGeneration from './pages/CodeGeneration';
 import Layout from './components/Layout';
@@ -31,7 +32,8 @@ function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path="metric-configs" element={<MetricConfigs />} />
+            <Route path="metric-configs" element={<MetricConfigurationsList />} />
+            <Route path="metric-configs/new" element={<MetricConfigs />} />
             <Route path="api-keys" element={<ApiKeys />} />
             <Route path="code-generation" element={<CodeGeneration />} />
           </Route>

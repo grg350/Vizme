@@ -31,8 +31,8 @@ function Layout() {
 
   const isOnboardingRoute = useMemo(() => {
     return (
-      location.pathname === "/metric-configs" ||
-      location.pathname.startsWith("/metric-configs/") ||
+      location.pathname === "/metric-configs/new" ||
+      location.pathname.startsWith("/metric-configs/edit/") ||
       location.pathname === "/api-keys" ||
       location.pathname.startsWith("/api-keys/") ||
       location.pathname === "/code-generation" ||
@@ -51,7 +51,7 @@ function Layout() {
             {isOnboardingRoute ? (
               <>
                 <Link
-                  to="/metric-configs"
+                  to="/metric-configs/new"
                   className={`nav-link ${isOnboardingRoute ? "active" : ""}`}
                 >
                   Onboarding

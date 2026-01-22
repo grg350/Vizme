@@ -121,16 +121,8 @@ function MetricConfigs() {
   };
 
   const handleBack = () => {
-    // Prefer browser history. If unavailable, fall back to dashboard.
-    try {
-      if (window.history.length > 1) {
-        navigate(-1);
-        return;
-      }
-    } catch {
-      // ignore
-    }
-    navigate("/");
+    // Navigate back to the configurations list
+    navigate("/metric-configs");
   };
 
   return (
