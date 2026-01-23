@@ -12,7 +12,9 @@
       "forceConsistentCasingInFileNames": true,
       "noFallthroughCasesInSwitch": true,
       "jsx": "react-jsx",
-      "noEmit": true
+      "noEmit": true,
+      "allowJs": true 
     },
     "include": ["src"]
   }
+  

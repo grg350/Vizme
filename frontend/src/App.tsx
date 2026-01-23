@@ -9,8 +9,13 @@ import CodeGeneration from './pages/CodeGeneration';
 import Layout from './components/Layout';
 import { ToastProvider } from './components/ToastContainer';
 import './App.css';
+import type { ReactNode } from 'react';
 
-function PrivateRoute({ children }) {
+type PrivateRouteProps = {
+  children: ReactNode;
+};
+
+function PrivateRoute({ children }: PrivateRouteProps) {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? children : <Navigate to="/login" />;
 }
