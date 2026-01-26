@@ -1,26 +1,38 @@
 import type { Request, Response, NextFunction } from "express";
+import { env } from "../config/env.js";
 
-/**
- * Express error-handling middleware.
- * Catches any error passed to next() or thrown in async routes,
- * and responds with a standardized 500 Internal Server Error JSON response.
- * 
- * - err: The error that occurred (can be any type).
- * - _req: The Express Request object (unused here).
- * - res: The Express Response object.
- * - _next: The Express NextFunction (unused here).
- *
- * This middleware should be registered after all other route handlers.
- */
+type AppError = {
+  statusCode?: number;
+  code?: string;
+  message?: string;
+};
+
+// Express error-handling middleware.
 export function errorHandler(
   err: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ) {
-  // Extract error message if available, or provide a generic fallback
   const message = err instanceof Error ? err.message : "Unknown error";
+  const statusCode =
+    typeof (err as AppError)?.statusCode === "number"
+      ? (err as AppError).statusCode!
+      : 500;
 
-  // Respond with HTTP 500 and error details in JSON format
-  res.status(500).json({ error: "InternalServerError", message });
+  const errorCode =
+    typeof (err as AppError)?.code === "string"
+      ? (err as AppError).code!
+      : statusCode === 500
+        ? "InternalServerError"
+        : "RequestError";
+
+  req.log?.error({ err }, "Request failed");
+
+  const publicMessage =
+    env.NODE_ENV === "production" && statusCode === 500
+      ? "Internal server error"
+      : message;
+
+  res.status(statusCode).json({ error: errorCode, message: publicMessage });
 }
