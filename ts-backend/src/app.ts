@@ -2,7 +2,7 @@ import express, { type RequestHandler } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import pinoHttp, { type HttpLogger } from "pino-http";
+import pinoHttp from "pino-http";
 import { healthRoutes } from "./routes/health.routes.js";
 import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";

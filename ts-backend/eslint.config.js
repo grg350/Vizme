@@ -8,6 +8,9 @@ const __dirname = dirname(__filename);
 
 export default [
   {
+    ignores: ["dist/**"],
+  },
+  {
     files: ["**/*.ts"],
     languageOptions: {
       parser: tsparser,
@@ -20,6 +23,10 @@ export default [
     plugins: { "@typescript-eslint": tseslint },
     rules: {
       ...tseslint.configs.recommended.rules,
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
     },
   },
 ];
