@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { metricConfigsAPI } from '../../api/metricConfigs';
-import { useToast } from '../../components/ToastContainer';
-import ProgressStepper from '../../components/ProgressStepper';
+import { metricConfigsAPI } from '@/api/metricConfigs';
+import { useToast } from '@/components/ToastContainer';
+import ProgressStepper from '@/components/ProgressStepper';
 import {
   SettingsIcon,
   AddCircleIcon,
@@ -11,7 +11,7 @@ import {
   ArrowRightIcon,
   UnfoldMoreIcon,
   ChevronLeftIcon,
-} from '../../assets/icons';
+} from '@/assets/icons';
 import './MetricConfigs.css';
 
 const METRIC_TYPES = ['Counter', 'Gauge', 'Summary', 'Histogram'];
