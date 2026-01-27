@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
+import App from '@/App.jsx'
+import '@/index.css'
 // Initialize theme store
-import './store/themeStore'
+import '@/store/themeStore'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

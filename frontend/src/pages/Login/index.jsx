@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../../store/authStore';
-import { authAPI } from '../../api/auth';
-import { useToast } from '../../components/ToastContainer';
-import Logo from '../../components/Logo';
-import { EyeIcon, EyeOffIcon } from '../../assets/icons';
-import '../Auth/Auth.css';
+import { useAuthStore } from '@/store/authStore';
+import { authAPI } from '@/api/auth';
+import { useToast } from '@/components/ToastContainer';
+import Logo from '@/components/Logo';
+import { EyeIcon, EyeOffIcon } from '@/assets/icons';
+import '@/pages/Auth/Auth.css';
 
 function Login() {
   const [email, setEmail] = useState('');
