@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { metricConfigsAPI } from '../../api/metricConfigs';
-import { useToast } from '../../components/ToastContainer';
-import ProgressStepper from '../../components/ProgressStepper';
+import { metricConfigsAPI } from '@/api/metricConfigs';
+import { useToast } from '@/components/ToastContainer';
+import ProgressStepper from '@/components/ProgressStepper';
 import {
   SettingsIcon,
   AddCircleIcon,
@@ -11,7 +11,7 @@ import {
   ArrowRightIcon,
   UnfoldMoreIcon,
   ChevronLeftIcon,
-} from '../../assets/icons';
+} from '@/assets/icons';
 import './MetricConfigs.css';
 
 const METRIC_TYPES = ['Counter', 'Gauge', 'Summary', 'Histogram'];
@@ -81,9 +81,17 @@ function MetricConfigForm({ isEdit = false }) {
   };
 
   const handleLabelChange = (index, field, value) => {
-    const updated = [...labels];
-    updated[index][field] = value;
-    setLabels(updated);
+    setLabels((prevLabels) => {
+      // Guard against invalid index or missing element (race condition protection)
+      if (index < 0 || index >= prevLabels.length || !prevLabels[index]) {
+        return prevLabels;
+      }
+      
+      // Immutable update pattern
+      const updated = [...prevLabels];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
   };
 
   // Generate metric_name from configuration name

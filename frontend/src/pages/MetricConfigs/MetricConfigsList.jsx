@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { metricConfigsAPI } from '../../api/metricConfigs';
-import { useToast } from '../../components/ToastContainer';
+import { metricConfigsAPI } from '@/api/metricConfigs';
+import { useToast } from '@/components/ToastContainer';
 import {
   PlusIcon,
   EditIcon,
   CopyIcon,
   ArchiveIcon,
-} from '../../assets/icons';
+} from '@/assets/icons';
 import './MetricConfigsList.css';
 
 // Label color mapping based on label content

@@ -1,4 +1,4 @@
-import { BarChartIcon, KeyIcon, RocketIcon } from '../../assets/icons';
+import { BarChartIcon, KeyIcon, RocketIcon } from '@/assets/icons';
 import './ProgressStepper.css';
 
 function ProgressStepper({ currentStep = 1 }) {
