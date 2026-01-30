@@ -47,7 +47,9 @@
   background: var(--primary);
   border-color: var(--primary);
   color: white;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 4px 12px rgba(59, 130, 246, 0.25);
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.15),
+    0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
 .step-item.completed .step-icon-wrapper {
@@ -77,12 +79,12 @@
   .progress-stepper {
     gap: 0;
   }
-  
+
   .step-connector {
     width: 2rem;
     margin: 0 0.5rem;
   }
-  
+
   .step-label {
     display: none;
   }

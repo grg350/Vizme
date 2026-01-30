@@ -25,7 +25,7 @@ function Login() {
     try {
       const response = await authAPI.signin(email, password);
       const { user, accessToken, refreshToken } = response.data;
-      
+
       setAuth(user, accessToken, refreshToken);
       showToast('Welcome back! Redirecting...', 'success', 2000);
       setTimeout(() => navigate('/'), 500);
@@ -105,7 +105,12 @@ function Login() {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%' }}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+              style={{ width: '100%' }}
+            >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>

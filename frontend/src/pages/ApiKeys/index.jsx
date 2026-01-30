@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { apiKeysAPI } from "@/api/apiKeys";
-import { useToast } from "@/components/ToastContainer";
-import ProgressStepper from "@/components/ProgressStepper";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { apiKeysAPI } from '@/api/apiKeys';
+import { useToast } from '@/components/ToastContainer';
+import ProgressStepper from '@/components/ProgressStepper';
 import {
   AddCircleIcon,
   CopyIcon,
@@ -16,15 +16,15 @@ import {
   SecurityIcon,
   HubIcon,
   EyeOffIcon,
-} from "@/assets/icons";
-import "./ApiKeys.css";
+} from '@/assets/icons';
+import './ApiKeys.css';
 
 function ApiKeys() {
   const navigate = useNavigate();
   const [keys, setKeys] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [keyName, setKeyName] = useState("Main Analytics Feed");
-  const [environment, setEnvironment] = useState("production");
+  const [keyName, setKeyName] = useState('Main Analytics Feed');
+  const [environment, setEnvironment] = useState('production');
   const [permissions, setPermissions] = useState({
     readMetrics: true,
     writeData: true,
@@ -33,7 +33,7 @@ function ApiKeys() {
   });
   const [newKey, setNewKey] = useState(null);
   const [generating, setGenerating] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -45,7 +45,7 @@ function ApiKeys() {
       const response = await apiKeysAPI.getAll();
       setKeys(response.data || []);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to fetch API keys");
+      setError(err.response?.data?.error || 'Failed to fetch API keys');
     } finally {
       setLoading(false);
     }
@@ -53,23 +53,22 @@ function ApiKeys() {
 
   const handleGenerateKey = async () => {
     if (!keyName.trim()) {
-      showToast("Please enter a key name", "error");
+      showToast('Please enter a key name', 'error');
       return;
     }
 
     setGenerating(true);
-    setError("");
+    setError('');
 
     try {
       const response = await apiKeysAPI.create(keyName);
       setNewKey(response.data);
-      showToast("API key generated successfully!", "success");
+      showToast('API key generated successfully!', 'success');
       await fetchKeys();
     } catch (err) {
-      const errorMsg =
-        err.response?.data?.error || "Failed to generate API key";
+      const errorMsg = err.response?.data?.error || 'Failed to generate API key';
       setError(errorMsg);
-      showToast(errorMsg, "error");
+      showToast(errorMsg, 'error');
     } finally {
       setGenerating(false);
     }
@@ -77,26 +76,24 @@ function ApiKeys() {
 
   const handleRevoke = async (id) => {
     if (
-      !window.confirm(
-        "Are you sure you want to revoke this API key? This action cannot be undone.",
-      )
+      !window.confirm('Are you sure you want to revoke this API key? This action cannot be undone.')
     ) {
       return;
     }
 
     try {
       await apiKeysAPI.delete(id);
-      showToast("API key revoked successfully!", "success");
+      showToast('API key revoked successfully!', 'success');
       await fetchKeys();
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "Failed to revoke API key";
-      showToast(errorMsg, "error");
+      const errorMsg = err.response?.data?.error || 'Failed to revoke API key';
+      showToast(errorMsg, 'error');
     }
   };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    showToast("Copied to clipboard!", "success", 2000);
+    showToast('Copied to clipboard!', 'success', 2000);
   };
 
   const handlePermissionChange = (permission) => {
@@ -112,21 +109,21 @@ function ApiKeys() {
     const diffTime = Math.abs(now - date);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return "Created today";
-    if (diffDays === 1) return "Created 1 day ago";
+    if (diffDays === 0) return 'Created today';
+    if (diffDays === 1) return 'Created 1 day ago';
     return `Created ${diffDays} days ago`;
   };
 
   const maskKey = (key) => {
-    if (!key) return "";
+    if (!key) return '';
     const prefix = key.substring(0, 8);
     return `${prefix}••••_••••_••••`;
   };
 
   const getEnvironmentFromKey = (key) => {
-    if (key.api_key?.includes("live")) return "production";
-    if (key.api_key?.includes("test")) return "staging";
-    return "development";
+    if (key.api_key?.includes('live')) return 'production';
+    if (key.api_key?.includes('test')) return 'staging';
+    return 'development';
   };
 
   if (loading) {
@@ -151,9 +148,7 @@ function ApiKeys() {
         <div className="apikeys-header">
           <div className="apikeys-header-content">
             <h1 className="apikeys-title">Step 2: Generate API Key</h1>
-            <p className="apikeys-subtitle">
-              Establish a secure connection to your data sources.
-            </p>
+            <p className="apikeys-subtitle">Establish a secure connection to your data sources.</p>
           </div>
           <button className="btn-docs">
             <DocumentIcon size={18} />
@@ -201,7 +196,7 @@ function ApiKeys() {
                     <input
                       type="checkbox"
                       checked={permissions.readMetrics}
-                      onChange={() => handlePermissionChange("readMetrics")}
+                      onChange={() => handlePermissionChange('readMetrics')}
                     />
                     <span className="permission-label">Read Metrics</span>
                   </label>
@@ -209,7 +204,7 @@ function ApiKeys() {
                     <input
                       type="checkbox"
                       checked={permissions.writeData}
-                      onChange={() => handlePermissionChange("writeData")}
+                      onChange={() => handlePermissionChange('writeData')}
                     />
                     <span className="permission-label">Write Data</span>
                   </label>
@@ -217,7 +212,7 @@ function ApiKeys() {
                     <input
                       type="checkbox"
                       checked={permissions.adminAccess}
-                      onChange={() => handlePermissionChange("adminAccess")}
+                      onChange={() => handlePermissionChange('adminAccess')}
                     />
                     <span className="permission-label">Admin Access</span>
                   </label>
@@ -225,20 +220,16 @@ function ApiKeys() {
                     <input
                       type="checkbox"
                       checked={permissions.webhooks}
-                      onChange={() => handlePermissionChange("webhooks")}
+                      onChange={() => handlePermissionChange('webhooks')}
                     />
                     <span className="permission-label">Webhooks</span>
                   </label>
                 </div>
               </div>
 
-              <button
-                className="btn-generate"
-                onClick={handleGenerateKey}
-                disabled={generating}
-              >
+              <button className="btn-generate" onClick={handleGenerateKey} disabled={generating}>
                 <AddCircleIcon size={20} />
-                {generating ? "Generating..." : "Generate New Key"}
+                {generating ? 'Generating...' : 'Generate New Key'}
               </button>
             </div>
 
@@ -256,7 +247,7 @@ function ApiKeys() {
 
               <div className="secret-key-display">
                 <div className="key-value">
-                  {newKey ? newKey.api_key : "vz_live_••••_••••_••••_••••"}
+                  {newKey ? newKey.api_key : 'vz_live_••••_••••_••••_••••'}
                 </div>
                 <div className="key-actions-inline">
                   <button
@@ -284,8 +275,8 @@ function ApiKeys() {
                   <div className="warning-content">
                     <p className="warning-title">Security Warning</p>
                     <p className="warning-text">
-                      For your security, we only show this key once. Please
-                      store it in a secure password manager immediately.
+                      For your security, we only show this key once. Please store it in a secure
+                      password manager immediately.
                     </p>
                   </div>
                 </div>
@@ -305,9 +296,7 @@ function ApiKeys() {
           <div className="existing-keys-section">
             <div className="existing-keys-header">
               <h3 className="section-title">Existing Project Keys</h3>
-              <span className="keys-count">
-                Total: {keys.length} Active Keys
-              </span>
+              <span className="keys-count">Total: {keys.length} Active Keys</span>
             </div>
 
             <div className="keys-table-container">
@@ -335,26 +324,21 @@ function ApiKeys() {
                           <td>
                             <div className="key-name-cell">
                               <span className="key-name">{key.key_name}</span>
-                              <span className="key-created">
-                                {formatDate(key.created_at)}
-                              </span>
+                              <span className="key-created">{formatDate(key.created_at)}</span>
                             </div>
                           </td>
                           <td>
                             <span className={`env-badge env-${env}`}>
-                              {env === "production"
-                                ? "Production"
-                                : env === "staging"
-                                  ? "Staging"
-                                  : "Development"}
+                              {env === 'production'
+                                ? 'Production'
+                                : env === 'staging'
+                                  ? 'Staging'
+                                  : 'Development'}
                             </span>
                           </td>
                           <td className="key-masked">{maskKey(key.api_key)}</td>
                           <td className="text-right">
-                            <button
-                              className="btn-revoke"
-                              onClick={() => handleRevoke(key.id)}
-                            >
+                            <button className="btn-revoke" onClick={() => handleRevoke(key.id)}>
                               Revoke
                             </button>
                           </td>
@@ -370,24 +354,15 @@ function ApiKeys() {
 
         {/* Footer Navigation */}
         <div className="apikeys-footer">
-          <button
-            className="btn-back"
-            onClick={() => navigate("/metric-configs")}
-          >
+          <button className="btn-back" onClick={() => navigate('/metric-configs')}>
             <ArrowBackIcon size={18} />
             Back to Metrics
           </button>
           <div className="footer-actions">
-            <button
-              className="btn-skip"
-              onClick={() => navigate("/code-generation")}
-            >
+            <button className="btn-skip" onClick={() => navigate('/code-generation')}>
               Skip for now
             </button>
-            <button
-              className="btn-continue"
-              onClick={() => navigate("/code-generation")}
-            >
+            <button className="btn-continue" onClick={() => navigate('/code-generation')}>
               Continue to Activation
             </button>
           </div>
@@ -400,32 +375,31 @@ function ApiKeys() {
           <SecurityIcon size={24} className="feature-icon" />
           <h4 className="feature-title">Encrypted Storage</h4>
           <p className="feature-description">
-            All keys are hashed using industry-standard salt protocols before
-            storage in our secure vault.
+            All keys are hashed using industry-standard salt protocols before storage in our secure
+            vault.
           </p>
         </div>
         <div className="feature-card">
           <HubIcon size={24} className="feature-icon" />
           <h4 className="feature-title">Multi-Environment</h4>
           <p className="feature-description">
-            Generate isolated keys for prod, staging, and local development
-            flows to ensure data integrity.
+            Generate isolated keys for prod, staging, and local development flows to ensure data
+            integrity.
           </p>
         </div>
         <div className="feature-card">
           <EyeOffIcon size={24} className="feature-icon" />
           <h4 className="feature-title">Least Privilege</h4>
           <p className="feature-description">
-            Use the permissions matrix to restrict keys to only necessary
-            actions, minimizing security risk.
+            Use the permissions matrix to restrict keys to only necessary actions, minimizing
+            security risk.
           </p>
         </div>
       </div>
 
       {/* Footer */}
       <footer className="page-footer">
-        &copy; 2024 VIZME Inc. &bull; Enterprise Grade &bull; Built for
-        Engineering Teams
+        &copy; 2024 VIZME Inc. &bull; Enterprise Grade &bull; Built for Engineering Teams
       </footer>
     </div>
   );

@@ -1,14 +1,8 @@
-import { defaultSvgProps } from "./constants";
+import { defaultSvgProps } from './constants';
 
 export function ArrowBackIcon({ size = 30, ...props }) {
   return (
-    <svg
-      {...defaultSvgProps}
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
-      {...props}
-    >
+    <svg {...defaultSvgProps} viewBox="0 0 24 24" width={size} height={size} {...props}>
       <path
         d="m12 19-7-7 7-7"
         stroke="currentColor"

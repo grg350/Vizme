@@ -1,16 +1,16 @@
-import { BarChartIcon, KeyIcon, RocketIcon, CheckIcon } from "@/assets/icons";
-import "./ProgressStepper.css";
+import { BarChartIcon, KeyIcon, RocketIcon, CheckIcon } from '@/assets/icons';
+import './ProgressStepper.css';
 
 function ProgressStepper({ currentStep = 1 }) {
   const steps = [
     {
       number: 1,
-      label: "Metric Setup",
+      label: 'Metric Setup',
       icon: BarChartIcon,
-      id: "metric-setup",
+      id: 'metric-setup',
     },
-    { number: 2, label: "API Key", icon: KeyIcon, id: "api-key" },
-    { number: 3, label: "Activation", icon: RocketIcon, id: "activation" },
+    { number: 2, label: 'API Key', icon: KeyIcon, id: 'api-key' },
+    { number: 3, label: 'Activation', icon: RocketIcon, id: 'activation' },
   ];
 
   return (
@@ -23,7 +23,7 @@ function ProgressStepper({ currentStep = 1 }) {
         return (
           <div key={step.id} className="step-wrapper">
             <div
-              className={`step-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
+              className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
             >
               <div className="step-icon-wrapper">
                 {isCompleted ? <CheckIcon size={18} /> : <Icon size={20} />}
@@ -31,9 +31,7 @@ function ProgressStepper({ currentStep = 1 }) {
               <span className="step-label">{step.label}</span>
             </div>
             {index < steps.length - 1 && (
-              <div
-                className={`step-connector ${isCompleted ? "completed" : ""}`}
-              ></div>
+              <div className={`step-connector ${isCompleted ? 'completed' : ''}`}></div>
             )}
           </div>
         );

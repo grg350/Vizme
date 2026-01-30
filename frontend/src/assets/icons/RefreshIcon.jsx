@@ -1,14 +1,8 @@
-import { defaultSvgProps } from "./constants";
+import { defaultSvgProps } from './constants';
 
 export function RefreshIcon({ size = 30, ...props }) {
   return (
-    <svg
-      {...defaultSvgProps}
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
-      {...props}
-    >
+    <svg {...defaultSvgProps} viewBox="0 0 24 24" width={size} height={size} {...props}>
       <path
         d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
         stroke="currentColor"
