@@ -7,6 +7,9 @@ class VizmeClient {
       this.endpoint = config.endpoint || 'http://localhost:3000/api/v1/metrics';
       this.batchSize = config.batchSize || 10;
       this.flushInterval = config.flushInterval || 5000;
+
+      //store metric configurations (metric name -> type mapping )
+      this.metricConfigs = config.metricConfigs || {};
       
       this.batch = [];
       this.queue = [];
@@ -33,9 +36,21 @@ class VizmeClient {
     track(name, value, labels = {}) {
       if (this.isDestroyed) return this;
       
+      let metricType = 'gauge';
+
+      //first check if this metric has a configuration
+      if (this.metricConfigs[name] && this.metricConfigs[name].type) {
+        metricType = this.metricConfigs[name].type;
+      }
+
+      //if no config, check for _type in labels (backward compatibility)
+      else if (labels._type) {
+        metricType = labels._type;
+      }
+
       const metric = {
         name: String(name),
-        type: 'gauge',
+        type: metricType,
         value: typeof value === 'number' ? value : parseFloat(value) || 0,
         labels: this.sanitizeLabels(labels)
       };
@@ -51,15 +66,21 @@ class VizmeClient {
     }
     
     increment(name, value = 1, labels = {}) {
-      return this.track(name, value, { ...labels, _type: 'counter' });
+      // only use counter as a fallback when no config exists
+      const defaultType = this.metricConfigs[name] ? undefined : 'counter';
+      return this.track(name, value, { ...labels, _type: defaultType });
     }
     
     decrement(name, value = 1, labels = {}) {
-      return this.track(name, -Math.abs(value), { ...labels, _type: 'gauge' });
+      //use gauge as a fallback only when no config exists
+      const defaultType = this.metricConfigs[name] ? undefined : 'gauge';
+      return this.track(name, -Math.abs(value), { ...labels, _type: defaultType });
     }
     
     set(name, value, labels = {}) {
-      return this.track(name, value, { ...labels, _type: 'gauge' });
+      // only use gauge as a fallback when no config exists
+      const defaultType = this.metricConfigs[name] ? undefined : "gauge";
+      return this.track(name, value, { ...labels, _type: defaultType });
     }
     
     sanitizeLabels(labels) {
@@ -524,6 +545,8 @@ class VizmeClient {
         autoTrack: config.autoTrack !== false, // Default: true
         batchSize: config.batchSize || 10,
         flushInterval: config.flushInterval || 5000,
+        metricConfigs: config.metricConfigs || {}, //store metric configurations
+        autofetchConfigs: config.autofetchConfigs !== false, // Default: true
         ...config
       };
       
@@ -532,8 +555,20 @@ class VizmeClient {
         apiKey: this.config.apiKey,
         endpoint: this.config.endpoint,
         batchSize: this.config.batchSize,
-        flushInterval: this.config.flushInterval
+        flushInterval: this.config.flushInterval,
+        metricConfigs: this.config.metricConfigs //pass metric configurations to the client
       });
+
+          // Auto-fetch metric configs from backend
+    if (this.config.autoFetchConfigs && !config.metricConfigs) {
+      this.fetchMetricConfigs().then(configs => {
+        // Update client with fetched configs
+        this.client.metricConfigs = configs;
+      }).catch(error => {
+        console.warn('Vizme: Could not fetch metric configs, using defaults', error);
+        // Continue with empty configs (will use method defaults)
+      });
+    }
       
       // Initialize auto-tracker if enabled
       if (this.config.autoTrack) {
@@ -541,6 +576,37 @@ class VizmeClient {
         this.autoTracker.start();
       }
     }
+
+      // Method to fetch metric configs from backend
+  async fetchMetricConfigs() {
+    try {
+      // Extract base URL from endpoint
+      const baseUrl = this.config.endpoint.replace('/api/v1/metrics', '');
+      const configUrl = `${baseUrl}/api/v1/metric-configs/by-api-key`;
+      
+      const response = await fetch(configUrl, {
+        method: 'GET',
+        headers: {
+          'X-API-Key': this.config.apiKey
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        return data.data;
+      }
+      
+      return {};
+    } catch (error) {
+      console.warn('Vizme: Failed to fetch metric configs', error);
+      return {};
+    }
+  }
     
     // Manual tracking API
     track(name, value, labels = {}) {
