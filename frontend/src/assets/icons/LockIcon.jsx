@@ -1,19 +1,26 @@
 import { defaultSvgProps } from './constants';
 
-export function BellIcon({ size = 20, ...props }) {
+export function LockIcon({ size = 30, ...props }) {
   return (
     <svg {...defaultSvgProps} viewBox="0 0 24 24" width={size} height={size} {...props}>
-      <path
-        d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 7h18s-3 0-3-7Z"
+      <rect
+        x="3"
+        y="11"
+        width="18"
+        height="11"
+        rx="2"
+        ry="2"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M13.8 19a1.8 1.8 0 0 1-3.6 0"
+        d="M7 11V7a5 5 0 0 1 10 0v4"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

@@ -25,7 +25,7 @@ function CodeGeneration() {
     try {
       const [keysRes, configsRes] = await Promise.all([
         apiKeysAPI.getAll(),
-        metricConfigsAPI.getAll()
+        metricConfigsAPI.getAll(),
       ]);
       setApiKeys(keysRes.data || []);
       setMetricConfigs(configsRes.data || []);
@@ -71,7 +71,8 @@ function CodeGeneration() {
     <div className="code-generation">
       <h1>Code Generation</h1>
       <p className="page-subtitle">
-        Generate tracking code to embed in your website. The code will automatically send metrics to your endpoint.
+        Generate tracking code to embed in your website. The code will automatically send metrics to
+        your endpoint.
       </p>
 
       {error && <div className="error-message">{error}</div>}
@@ -88,9 +89,13 @@ function CodeGeneration() {
               required
             >
               <option value="">Select an API key</option>
-              {apiKeys.filter(k => k.is_active).map(key => (
-                <option key={key.id} value={key.id}>{key.key_name}</option>
-              ))}
+              {apiKeys
+                .filter((k) => k.is_active)
+                .map((key) => (
+                  <option key={key.id} value={key.id}>
+                    {key.key_name}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -102,8 +107,10 @@ function CodeGeneration() {
               onChange={(e) => setSelectedMetricConfig(e.target.value)}
             >
               <option value="">All configurations</option>
-              {metricConfigs.map(config => (
-                <option key={config.id} value={config.id}>{config.name}</option>
+              {metricConfigs.map((config) => (
+                <option key={config.id} value={config.id}>
+                  {config.name}
+                </option>
               ))}
             </select>
             <small className="form-hint">Leave empty to include all metric configurations</small>
@@ -148,15 +155,22 @@ function CodeGeneration() {
             </button>
           </div>
           <div className="code-container">
-            <pre><code>{generatedCode}</code></pre>
+            <pre>
+              <code>{generatedCode}</code>
+            </pre>
           </div>
           <div className="code-instructions">
             <h3>How to use:</h3>
             <ol>
               <li>Copy the code above</li>
-              <li>Paste it before the closing <code>&lt;/body&gt;</code> tag in your HTML</li>
+              <li>
+                Paste it before the closing <code>&lt;/body&gt;</code> tag in your HTML
+              </li>
               <li>The code will automatically start tracking metrics</li>
-              <li>For custom events, use: <code>window.trackMetric('metric_name', value, labels)</code></li>
+              <li>
+                For custom events, use:{' '}
+                <code>window.trackMetric('metric_name', value, labels)</code>
+              </li>
             </ol>
           </div>
         </div>

@@ -6,8 +6,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 const client = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
 // Request interceptor to add auth token
@@ -35,13 +35,13 @@ client.interceptors.response.use(
 
       try {
         const { refreshToken, updateToken } = useAuthStore.getState();
-        
+
         if (!refreshToken) {
           throw new Error('No refresh token');
         }
 
         const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, {
-          refreshToken
+          refreshToken,
         });
 
         const { accessToken } = response.data.data;

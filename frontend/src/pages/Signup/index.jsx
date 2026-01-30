@@ -26,7 +26,7 @@ function Signup() {
     try {
       const response = await authAPI.signup(email, password, name);
       const { user, accessToken, refreshToken } = response.data;
-      
+
       setAuth(user, accessToken, refreshToken);
       showToast('Account created successfully! Redirecting...', 'success', 2000);
       setTimeout(() => navigate('/'), 500);
@@ -48,7 +48,9 @@ function Signup() {
           </div>
 
           <h1 className="auth-title-hero">Sign Up</h1>
-          <p className="auth-subtitle auth-subtitle-lg">Join the next generation of engineering analytics.</p>
+          <p className="auth-subtitle auth-subtitle-lg">
+            Join the next generation of engineering analytics.
+          </p>
 
           {error && <div className="error-message">{error}</div>}
 
@@ -108,7 +110,12 @@ function Signup() {
               <small className="form-hint">Must be at least 8 characters with one number.</small>
             </div>
 
-            <button type="submit" className="btn btn-primary auth-cta" disabled={loading} style={{ width: '100%' }}>
+            <button
+              type="submit"
+              className="btn btn-primary auth-cta"
+              disabled={loading}
+              style={{ width: '100%' }}
+            >
               <span>{loading ? 'Creating account…' : 'Create Account'}</span>
               <ArrowRightIcon size={20} />
             </button>
