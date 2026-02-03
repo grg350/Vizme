@@ -52,7 +52,8 @@ class VizmeClient {
         name: String(name),
         type: metricType,
         value: typeof value === 'number' ? value : parseFloat(value) || 0,
-        labels: this.sanitizeLabels(labels)
+        labels: this.sanitizeLabels(labels),
+        operation: labels._operation || 'set'
       };
       
       // Validate metric
@@ -68,19 +69,19 @@ class VizmeClient {
     increment(name, value = 1, labels = {}) {
       // only use counter as a fallback when no config exists
       const defaultType = this.metricConfigs[name] ? undefined : 'counter';
-      return this.track(name, value, { ...labels, _type: defaultType });
+      return this.track(name, value, { ...labels, _type: defaultType, _operation: 'increment' });
     }
     
     decrement(name, value = 1, labels = {}) {
       //use gauge as a fallback only when no config exists
       const defaultType = this.metricConfigs[name] ? undefined : 'gauge';
-      return this.track(name, -Math.abs(value), { ...labels, _type: defaultType });
+      return this.track(name, -Math.abs(value), { ...labels, _type: defaultType, _operation: 'decrement' });
     }
     
     set(name, value, labels = {}) {
       // only use gauge as a fallback when no config exists
       const defaultType = this.metricConfigs[name] ? undefined : "gauge";
-      return this.track(name, value, { ...labels, _type: defaultType });
+      return this.track(name, value, { ...labels, _type: defaultType, _operation: 'set' });
     }
     
     sanitizeLabels(labels) {
@@ -139,24 +140,6 @@ class VizmeClient {
         throw new Error('Vizme: API key not configured');
       }
       
-      // Use sendBeacon for better reliability on page unload
-      if (typeof navigator !== 'undefined' && 
-          navigator.sendBeacon && 
-          this.isPageUnloading()) {
-        const blob = new Blob(
-          [JSON.stringify({ metrics })],
-          { type: 'application/json' }
-        );
-        const url = new URL(this.endpoint);
-        url.searchParams.append('_beacon', '1');
-        
-        const sent = navigator.sendBeacon(url.toString(), blob);
-        if (!sent) {
-          throw new Error('Vizme: sendBeacon failed');
-        }
-        return;
-      }
-      
       // Regular fetch request
       const response = await fetch(this.endpoint, {
         method: 'POST',
@@ -165,7 +148,8 @@ class VizmeClient {
           'X-API-Key': this.apiKey
         },
         body: JSON.stringify({ metrics }),
-        keepalive: true
+        keepalive: true,
+        credentials: 'omit'
       });
       
       if (!response.ok) {
