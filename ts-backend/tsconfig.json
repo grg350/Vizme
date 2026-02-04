@@ -17,12 +17,7 @@
     "noFallthroughCasesInSwitch": true,
 
     "sourceMap": true,
-    "declaration": true,
-
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "declaration": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
