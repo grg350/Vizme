@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiKeysAPI } from '@/api/apiKeys';
 import { useToast } from '@/components/ToastContainer';
+import { useConfirm } from '@/components/ConfirmModal';
 import ProgressStepper from '@/components/ProgressStepper';
 import {
   AddCircleIcon,
@@ -17,6 +18,7 @@ import {
   HubIcon,
   EyeOffIcon,
 } from '@/assets/icons';
+import ApiKeysSkeleton from './ApiKeysSkeleton';
 import './ApiKeys.css';
 
 function ApiKeys() {
@@ -35,6 +37,7 @@ function ApiKeys() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
 
   useEffect(() => {
     fetchKeys();
@@ -75,9 +78,16 @@ function ApiKeys() {
   };
 
   const handleRevoke = async (id) => {
-    if (
-      !window.confirm('Are you sure you want to revoke this API key? This action cannot be undone.')
-    ) {
+    const confirmed = await confirm({
+      title: 'Revoke API Key',
+      message:
+        'Are you sure you want to revoke this API key? This action cannot be undone and any applications using this key will immediately lose access.',
+      variant: 'danger',
+      confirmText: 'Revoke Key',
+      cancelText: 'Cancel',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -127,15 +137,7 @@ function ApiKeys() {
   };
 
   if (loading) {
-    return (
-      <div className="apikeys-page">
-        <ProgressStepper currentStep={2} />
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Loading API keys...</p>
-        </div>
-      </div>
-    );
+    return <ApiKeysSkeleton />;
   }
 
   return (
