@@ -8,6 +8,7 @@ import ApiKeys from '@/pages/ApiKeys';
 import CodeGeneration from '@/pages/CodeGeneration';
 import Layout from '@/components/Layout';
 import { ToastProvider } from '@/components/ToastContainer';
+import { ConfirmModalProvider } from '@/components/ConfirmModal';
 import '@/App.css';
 
 function PrivateRoute({ children }) {
@@ -19,7 +20,8 @@ function App() {
   return (
     <Router>
       <ToastProvider>
-        <Routes>
+        <ConfirmModalProvider>
+          <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route
@@ -38,6 +40,7 @@ function App() {
             <Route path="code-generation" element={<CodeGeneration />} />
           </Route>
         </Routes>
+        </ConfirmModalProvider>
       </ToastProvider>
     </Router>
   );

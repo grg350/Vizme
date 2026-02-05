@@ -39,3 +39,5 @@ export { SecurityIcon } from './SecurityIcon';
 export { HubIcon } from './HubIcon';
 export { CheckIcon } from './CheckIcon';
 export { ArrowBackIcon } from './ArrowBackIcon';
+export { CloseIcon } from './CloseIcon';
+export { AlertTriangleIcon } from './AlertTriangleIcon';
