@@ -8,6 +8,7 @@ import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
+import { authRoutes } from "./routes/auth.routes.js";
 
 export const app = express();
 
@@ -38,6 +39,7 @@ app.use(
 app.use(express.json() as RequestHandler);
 
 app.use("/health", healthRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

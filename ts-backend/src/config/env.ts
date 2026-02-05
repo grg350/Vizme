@@ -1,3 +1,4 @@
+// src/config/env.ts
 import { z } from "zod";
 import dotenv from "dotenv";
 
@@ -17,6 +18,11 @@ const envSchema = z.object({
   DB_SSL: z.coerce.boolean().default(false),
   DB_SSL_REJECT_UNAUTHORIZED: z.coerce.boolean().default(true),
 
+  // JWT Configuration
+  JWT_SECRET: z.string().min(32), // At least 32 chars for security
+  JWT_ACCESS_EXPIRY: z.string().default("15m"), // 15 minutes
+  JWT_REFRESH_EXPIRY: z.string().default("7d"), // 7 days
+
   FRONTEND_URL: z.string().optional(),
   LOG_LEVEL: z
     .enum(["trace", "debug", "info", "warn", "error", "fatal"])
@@ -25,7 +31,4 @@ const envSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().default(300),
 });
 
-// If any required environment variable is missing or invalid, the module will throw
-// a Zod validation error at import time, preventing the application from starting
-// with invalid configuration.
 export const env = envSchema.parse(process.env);

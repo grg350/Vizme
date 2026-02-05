@@ -1,50 +1,68 @@
+// src/server.ts
 import { app } from "./app.js";
 import { env } from "./config/env.js";
 import { pool } from "./db/pool.js";
+import { runMigrations } from "./db/migrate.js";
 import { logger } from "./utils/logger.js";
 
-const server = app.listen(env.PORT, () => {
-  logger.info({ port: env.PORT }, "Server listening");
-});
+async function startServer() {
+  try {
+    // Run migrations before starting server
+    logger.info("Running database migrations...");
+    await runMigrations();
 
-let isShuttingDown = false;
+    // Start HTTP server
+    const server = app.listen(env.PORT, () => {
+      logger.info({ port: env.PORT }, "Server listening");
+    });
 
-async function shutdown(signal: string) {
-  if (isShuttingDown) return;
-  isShuttingDown = true;
+    // Shutdown handling
+    let isShuttingDown = false;
 
-  logger.warn({ signal }, "Shutdown initiated");
+    async function shutdown(signal: string) {
+      if (isShuttingDown) return;
+      isShuttingDown = true;
 
-  server.close(async (err) => {
-    if (err) {
-      logger.error({ err }, "Error closing HTTP server");
+      logger.warn({ signal }, "Shutdown initiated");
+
+      server.close(async (err) => {
+        if (err) {
+          logger.error({ err }, "Error closing HTTP server");
+        }
+
+        try {
+          await pool.end();
+          logger.info("Database pool closed");
+        } catch (dbErr) {
+          logger.error({ err: dbErr }, "Error closing database pool");
+        } finally {
+          process.exit(err ? 1 : 0);
+        }
+      });
+
+      setTimeout(() => {
+        logger.error("Forced shutdown after timeout");
+        process.exit(1);
+      }, 10_000).unref();
     }
 
-    try {
-      await pool.end();
-      logger.info("Database pool closed");
-    } catch (dbErr) {
-      logger.error({ err: dbErr }, "Error closing database pool");
-    } finally {
-      process.exit(err ? 1 : 0);
-    }
-  });
+    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
 
-  setTimeout(() => {
-    logger.error("Forced shutdown after timeout");
+    process.on("unhandledRejection", (reason) => {
+      logger.error({ reason }, "Unhandled promise rejection");
+      shutdown("unhandledRejection");
+    });
+
+    process.on("uncaughtException", (err) => {
+      logger.error({ err }, "Uncaught exception");
+      shutdown("uncaughtException");
+    });
+
+  } catch (error) {
+    logger.error({ error }, "Failed to start server");
     process.exit(1);
-  }, 10_000).unref();
+  }
 }
 
-process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-
-process.on("unhandledRejection", (reason) => {
-  logger.error({ reason }, "Unhandled promise rejection");
-  shutdown("unhandledRejection");
-});
-
-process.on("uncaughtException", (err) => {
-  logger.error({ err }, "Uncaught exception");
-  shutdown("uncaughtException");
-});
+startServer();
