@@ -72,6 +72,46 @@ services:
     depends_on:
       - prometheus
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.1
+    container_name: metrics_keycloak
+    # Note: 'start-dev' is for development. For production, use 'start' and configure properly.
+    # See: https://www.keycloak.org/server/configuration
+    command: start-dev
+    ports:
+      - "8090:8080"  # Keycloak admin console and API
+    env_file:
+      - .env # Load environment variables from .env file
+    environment:
+      # Keycloak Admin Credentials (set in .env)
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      # Database Configuration (using same cloud PostgreSQL as backend)
+      # Using full JDBC URL from .env file (KC_DB_URL)
+      - KC_DB=postgres
+      - KC_DB_URL=${KC_DB_URL}
+      - KC_DB_USERNAME=${DB_USER}
+      - KC_DB_PASSWORD=${DB_PASSWORD}
+      # HTTP Configuration
+      - KC_HTTP_RELATIVE_PATH=/auth
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      # Proxy Configuration (for production behind reverse proxy)
+      - KC_PROXY=edge
+      - KC_HTTP_ENABLED=true
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    networks:
+      - metrics_network
+    restart: unless-stopped
+    # Health endpoint is on management port 9000 (not 8080) in Keycloak 25
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
   backend:
     build:
       context: ../backend
@@ -127,6 +167,7 @@ volumes:
   prometheus_data:
   pushgateway_data:
   grafana_data:
+  keycloak_data:
 
 networks:
   metrics_network:
